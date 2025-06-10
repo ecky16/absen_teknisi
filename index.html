@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Masukkan Password</title>
+    <title>Login QR Absen</title>
     <style>
       body {
         font-family: sans-serif;
@@ -19,7 +19,7 @@
         margin-left: 10px;
       }
       #result {
-        margin-top: 20px;
+        margin-top: 30px;
       }
     </style>
   </head>
@@ -32,12 +32,14 @@
     <script>
       async function checkPassword() {
         const passInput = document.getElementById('passwordInput').value.trim();
+        const resultDiv = document.getElementById('result');
+        resultDiv.innerHTML = '⏳ Memeriksa...';
+
         const res = await fetch(
           `https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec?pass=${passInput}`
         );
         const data = await res.json();
 
-        const resultDiv = document.getElementById('result');
         if (data.valid) {
           resultDiv.innerHTML = `
             <h3>✅ Akses Disetujui</h3>
