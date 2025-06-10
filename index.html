@@ -33,7 +33,7 @@
       async function checkPassword() {
         const passInput = document.getElementById('passwordInput').value.trim();
         const res = await fetch(
-          `https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec?pass=${passInput}`
+          `https://script.google.com/macros/s/https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec/exec?pass=${passInput}`
         );
         const data = await res.json();
 
