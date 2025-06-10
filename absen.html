@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Absen Teknisi</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding-top: 50px;
+      background-color: #f1f1f1;
+    }
+    h2 {
+      margin-bottom: 10px;
+    }
+    p {
+      margin-bottom: 30px;
+    }
+    button {
+      padding: 15px 25px;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 8px;
+      background-color: green;
+      color: white;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h2>Halo, <span id="nama">...</span></h2>
+  <p>Silakan klik tombol di bawah untuk absen</p>
+  <button onclick="submitAbsen()">Absen Sekarang</button>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    const user = tg.initDataUnsafe.user;
+    const nama = user?.first_name || "User";
+    const id = user?.id || "Unknown";
+
+    document.getElementById("nama").innerText = nama;
+
+    function submitAbsen() {
+      const token = "MANUAL"; // Bisa diganti jika ambil dari URL
+      const url = `https://script.google.com/macros/s/AKfycbwM4weP8mfrj231RwoLBed31-eQbq0SqGrhhPNkA-4G6HlzbubZ0WwXYPRGVDEOND3K/exec?token=${token}&nama=${nama}&id=${id}`;
+      window.location.href = url;
+    }
+  </script>
+</body>
+</html>
+
+
