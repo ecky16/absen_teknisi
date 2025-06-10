@@ -70,9 +70,9 @@
       document.getElementById("clock").innerText = `${jam}:${menit}:${detik}`;
     }
 
-    function mintaPassword() {
-      window.location.href = "https://t.me/absen_TA_bot?start=GETQR";
-    }
+   function mintaPassword() {
+  window.open("https://t.me/absen_TA_bot?start=OTPTRIGGER", "_blank");
+}
 
     async function cekPassword() {
       const inputPass = document.getElementById("passwordInput").value.trim();
