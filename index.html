@@ -7,7 +7,7 @@
     body {
       background-color: #000;
       color: white;
-      font-family: Arial, sans-serif;
+      font-family: 'Arial', sans-serif;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -16,7 +16,14 @@
       margin: 0;
     }
     h1 {
+      margin-bottom: 10px;
+      font-size: 2rem;
+    }
+    #clock {
+      font-size: 2.5rem;
+      font-weight: bold;
       margin-bottom: 20px;
+      letter-spacing: 2px;
     }
     #qrcode {
       background-color: white;
@@ -27,7 +34,7 @@
 </head>
 <body>
   <h1>Silakan Scan untuk Absen</h1>
-  <div id="clock" style="font-size: 2rem; margin-bottom: 20px;"></div>
+  <div id="clock">--:--:--</div>
   <div id="qrcode"></div>
 
   <script>
@@ -72,7 +79,7 @@
     fetchToken();
     setInterval(fetchToken, 3000);
     setInterval(updateClock, 1000);
-    updateClock(); // langsung tampil pas load
+    updateClock();
   </script>
 </body>
 </html>
