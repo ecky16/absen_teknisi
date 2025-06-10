@@ -88,7 +88,8 @@
   </div>
 
   <script>
-    const SCRIPT_ID = 'https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec';
+    // ID yang kamu kasih
+    const SCRIPT_ID = 'AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO';
     const SHEET_ID = '1wqYmtZ_PS8Ao-gpCBjqdSi1MmzotBmZa1BeALFmUuu4';
 
     function updateClock() {
@@ -114,7 +115,7 @@
       errorBox.textContent = '⏳ Memeriksa...';
 
       try {
-        const res = await fetch(`https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec?pass=${input}`);
+        const res = await fetch(`https://script.google.com/macros/s/${SCRIPT_ID}/exec?pass=${input}`);
         const data = await res.json();
 
         if (data.valid) {
