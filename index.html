@@ -16,9 +16,18 @@
       margin: 0;
     }
 
+    #datetime {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    #date {
+      font-size: 28px;
+    }
+
     #clock {
       font-size: 60px;
-      margin-bottom: 20px;
+      margin-top: 10px;
     }
 
     #password-form {
@@ -57,7 +66,7 @@
     }
 
     #qr-image {
-      margin-top: 30px;
+      margin-top: 20px;
     }
   </style>
 </head>
@@ -71,19 +80,27 @@
 
   <!-- QR MODE -->
   <div id="qr-section">
-    <div id="clock">00:00:00</div>
+    <div id="datetime">
+      <div id="date">Memuat tanggal...</div>
+      <div id="clock">00:00:00</div>
+    </div>
     <img id="qr-image" src="" width="220" />
   </div>
 
   <script>
-    const SCRIPT_ID = 'YOUR_SCRIPT_ID'; // Ganti dengan ID Web App kamu
+    const SCRIPT_ID = 'GANTI_DENGAN_SCRIPT_ID_MU';
     const SHEET_ID = '1wqYmtZ_PS8Ao-gpCBjqdSi1MmzotBmZa1BeALFmUuu4';
 
-    // Jam real-time
     function updateClock() {
       const now = new Date();
-      const jam = now.toLocaleTimeString('id-ID');
-      document.getElementById('clock').innerText = jam;
+      const hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+      const bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+
+      const tanggal = `${hari[now.getDay()]}, ${now.getDate()} ${bulan[now.getMonth()]} ${now.getFullYear()}`;
+      const waktu = now.toLocaleTimeString('id-ID');
+
+      document.getElementById('date').innerText = tanggal;
+      document.getElementById('clock').innerText = waktu;
     }
 
     function startClock() {
@@ -96,38 +113,50 @@
       const errorBox = document.getElementById('error-message');
       errorBox.textContent = '⏳ Memeriksa...';
 
-      const res = await fetch(`https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec?pass=${input}`);
-      const data = await res.json();
+      try {
+        const res = await fetch(`https://script.google.com/macros/s/${SCRIPT_ID}/exec?pass=${input}`);
+        const data = await res.json();
 
-      if (data.valid) {
-        sessionStorage.setItem('qr_login', 'true'); // simpan status login sesi ini
-        showQR();
-      } else {
-        errorBox.textContent = '❌ Password salah';
+        if (data.valid) {
+          sessionStorage.setItem('qr_login', 'true');
+          await showQR();
+        } else {
+          errorBox.textContent = '❌ Password salah';
+        }
+      } catch (err) {
+        errorBox.textContent = '⚠️ Gagal menghubungi server';
       }
     }
 
     async function showQR() {
       document.getElementById('password-form').style.display = 'none';
       document.getElementById('qr-section').style.display = 'flex';
-      loadQR();
       startClock();
+
+      try {
+        const sheetAPI = `https://opensheet.elk.sh/${SHEET_ID}/token_qr`;
+        const res = await fetch(sheetAPI);
+        const rows = await res.json();
+        const token = rows[0]?.A;
+
+        if (!token) {
+          document.getElementById('qr-image').alt = '❌ Gagal memuat token';
+          return;
+        }
+
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://script.google.com/macros/s/${SCRIPT_ID}/exec?token=${token}`;
+        document.getElementById('qr-image').src = qrUrl;
+      } catch (err) {
+        document.getElementById('qr-image').alt = '❌ QR gagal dimuat';
+      }
     }
 
-    async function loadQR() {
-      const sheetAPI = `https://opensheet.elk.sh/${SHEET_ID}/token_qr`;
-      const res = await fetch(sheetAPI);
-      const rows = await res.json();
-      const token = rows[0]?.A;
-
-      const qrImg = document.getElementById('qr-image');
-      qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://script.google.com/macros/s/${SCRIPT_ID}/exec?token=${token}`;
-    }
-
-    // Saat halaman dimuat ulang
-    if (sessionStorage.getItem('qr_login') === 'true') {
-      showQR();
-    }
+    // AUTO LOGIN JIKA MASIH DI SESI YANG SAMA
+    window.onload = async () => {
+      if (sessionStorage.getItem('qr_login') === 'true') {
+        await showQR();
+      }
+    };
   </script>
 </body>
 </html>
