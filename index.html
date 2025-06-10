@@ -129,7 +129,7 @@
       }
     }
 
- async function showQR() {
+async function showQR() {
   document.getElementById('password-form').style.display = 'none';
   document.getElementById('qr-section').style.display = 'flex';
   startClock();
@@ -139,9 +139,9 @@
     const res = await fetch(sheetAPI);
     const rows = await res.json();
 
-    console.log(rows); // debug
+    console.log('DEBUG rows:', rows);
 
-    const token = rows.length > 0 && rows[0].A ? rows[0].A : null;
+    const token = rows[0]?.["Token Aktif"]; // sesuai header di Sheet
 
     if (!token) {
       document.getElementById('qr-image').alt = '❌ Token kosong atau tidak ditemukan';
@@ -154,6 +154,7 @@
     document.getElementById('qr-image').alt = '❌ QR gagal dimuat';
   }
 }
+
 
 
     // AUTO LOGIN JIKA MASIH DI SESI YANG SAMA
