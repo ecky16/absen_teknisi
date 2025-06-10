@@ -129,28 +129,32 @@
       }
     }
 
-    async function showQR() {
-      document.getElementById('password-form').style.display = 'none';
-      document.getElementById('qr-section').style.display = 'flex';
-      startClock();
+ async function showQR() {
+  document.getElementById('password-form').style.display = 'none';
+  document.getElementById('qr-section').style.display = 'flex';
+  startClock();
 
-      try {
-        const sheetAPI = `https://opensheet.elk.sh/${SHEET_ID}/token_qr`;
-        const res = await fetch(sheetAPI);
-        const rows = await res.json();
-        const token = rows[0]?.A;
+  try {
+    const sheetAPI = `https://opensheet.elk.sh/${SHEET_ID}/token_qr`;
+    const res = await fetch(sheetAPI);
+    const rows = await res.json();
 
-        if (!token) {
-          document.getElementById('qr-image').alt = '❌ Gagal memuat token';
-          return;
-        }
+    console.log(rows); // debug
 
-        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://script.google.com/macros/s/${SCRIPT_ID}/exec?token=${token}`;
-        document.getElementById('qr-image').src = qrUrl;
-      } catch (err) {
-        document.getElementById('qr-image').alt = '❌ QR gagal dimuat';
-      }
+    const token = rows.length > 0 && rows[0].A ? rows[0].A : null;
+
+    if (!token) {
+      document.getElementById('qr-image').alt = '❌ Token kosong atau tidak ditemukan';
+      return;
     }
+
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://script.google.com/macros/s/${SCRIPT_ID}/exec?token=${token}`;
+    document.getElementById('qr-image').src = qrUrl;
+  } catch (err) {
+    document.getElementById('qr-image').alt = '❌ QR gagal dimuat';
+  }
+}
+
 
     // AUTO LOGIN JIKA MASIH DI SESI YANG SAMA
     window.onload = async () => {
