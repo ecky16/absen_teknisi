@@ -126,35 +126,32 @@
       }
     }
 
-    async function showQR() {
-      document.getElementById('password-form').style.display = 'none';
-      document.getElementById('qr-section').style.display = 'flex';
-      startClock();
+async function showQR() {
+  document.getElementById('password-form').style.display = 'none';
+  document.getElementById('qr-section').style.display = 'flex';
+  startClock();
 
-      try {
-        const sheetAPI = `https://opensheet.elk.sh/${SHEET_ID}/token_qr`;
-        const res = await fetch(sheetAPI);
-        const rows = await res.json();
+  try {
+    const sheetAPI = `https://opensheet.elk.sh/${SHEET_ID}/token_qr`;
+    const res = await fetch(sheetAPI);
+    const rows = await res.json();
 
-        console.log('DEBUG row:', rows[0]);
-        const keys = Object.keys(rows[0]);
-        console.log('DEBUG keys:', keys);
+    const keys = Object.keys(rows[0]);
+    const tokenKey = keys.find(k => k.toLowerCase().includes("token"));
+    const token = rows[0][tokenKey];
 
-        const tokenKey = keys.find(k => k.toLowerCase().includes("token"));
-        const token = rows[0][tokenKey];
-
-        if (!token) {
-          document.getElementById('qr-image').alt = '❌ Token kosong atau tidak ditemukan';
-          return;
-        }
-
-        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://script.google.com/macros/s/${SCRIPT_ID}/exec?token=${token}`;
-        document.getElementById('qr-image').src = qrUrl;
-      } catch (err) {
-        document.getElementById('qr-image').alt = '❌ QR gagal dimuat';
-        console.error('Gagal:', err);
-      }
+    if (!token) {
+      document.getElementById('qr-image').alt = '❌ Token kosong atau tidak ditemukan';
+      return;
     }
+
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://script.google.com/macros/s/${SCRIPT_ID}/exec?token=${token}`;
+    document.getElementById('qr-image').src = qrUrl;
+  } catch (err) {
+    document.getElementById('qr-image').alt = '❌ QR gagal dimuat';
+  }
+}
+
 
     // Jalankan QR otomatis jika sesi masih aktif
     window.onload = async () => {
