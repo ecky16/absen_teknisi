@@ -1,55 +1,133 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>Login QR Absen</title>
-    <style>
-      body {
-        font-family: sans-serif;
-        text-align: center;
-        margin-top: 100px;
-      }
-      input {
-        padding: 10px;
-        font-size: 16px;
-      }
-      button {
-        padding: 10px 20px;
-        font-size: 16px;
-        margin-left: 10px;
-      }
-      #result {
-        margin-top: 30px;
-      }
-    </style>
-  </head>
-  <body>
-    <h2>🔐 Masukkan Password QR</h2>
-    <input type="text" id="passwordInput" placeholder="Password" />
-    <button onclick="checkPassword()">Submit</button>
-    <div id="result"></div>
+<head>
+  <meta charset="UTF-8">
+  <title>QR Absen</title>
+  <style>
+    body {
+      background-color: black;
+      color: white;
+      font-family: monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
 
-    <script>
-      async function checkPassword() {
-        const passInput = document.getElementById('passwordInput').value.trim();
-        const resultDiv = document.getElementById('result');
-        resultDiv.innerHTML = '⏳ Memeriksa...';
+    #clock {
+      font-size: 60px;
+      margin-bottom: 20px;
+    }
 
-        const res = await fetch(
-          `https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec?pass=${passInput}`
-        );
-        const data = await res.json();
+    #password-form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-        if (data.valid) {
-          resultDiv.innerHTML = `
-            <h3>✅ Akses Disetujui</h3>
-            <p>Silakan scan QR di bawah ini:</p>
-            <img src="qr.png" width="200" alt="QR Code" />
-          `;
-        } else {
-          resultDiv.innerHTML = `<h3 style="color:red;">❌ Password Salah</h3>`;
-        }
+    input {
+      padding: 10px;
+      font-size: 20px;
+      border: none;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #error-message {
+      color: red;
+      margin-top: 10px;
+    }
+
+    #qr-section {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #qr-image {
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <!-- FORM PASSWORD -->
+  <div id="password-form">
+    <input type="text" id="passwordInput" placeholder="Masukkan Password" autocomplete="off" />
+    <button onclick="checkPassword()">Masuk</button>
+    <div id="error-message"></div>
+  </div>
+
+  <!-- QR MODE -->
+  <div id="qr-section">
+    <div id="clock">00:00:00</div>
+    <img id="qr-image" src="" width="220" />
+  </div>
+
+  <script>
+    const SCRIPT_ID = 'YOUR_SCRIPT_ID'; // Ganti dengan ID Web App kamu
+    const SHEET_ID = '1wqYmtZ_PS8Ao-gpCBjqdSi1MmzotBmZa1BeALFmUuu4';
+
+    // Jam real-time
+    function updateClock() {
+      const now = new Date();
+      const jam = now.toLocaleTimeString('id-ID');
+      document.getElementById('clock').innerText = jam;
+    }
+
+    function startClock() {
+      updateClock();
+      setInterval(updateClock, 1000);
+    }
+
+    async function checkPassword() {
+      const input = document.getElementById('passwordInput').value.trim();
+      const errorBox = document.getElementById('error-message');
+      errorBox.textContent = '⏳ Memeriksa...';
+
+      const res = await fetch(`https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec?pass=${input}`);
+      const data = await res.json();
+
+      if (data.valid) {
+        sessionStorage.setItem('qr_login', 'true'); // simpan status login sesi ini
+        showQR();
+      } else {
+        errorBox.textContent = '❌ Password salah';
       }
-    </script>
-  </body>
+    }
+
+    async function showQR() {
+      document.getElementById('password-form').style.display = 'none';
+      document.getElementById('qr-section').style.display = 'flex';
+      loadQR();
+      startClock();
+    }
+
+    async function loadQR() {
+      const sheetAPI = `https://opensheet.elk.sh/${SHEET_ID}/token_qr`;
+      const res = await fetch(sheetAPI);
+      const rows = await res.json();
+      const token = rows[0]?.A;
+
+      const qrImg = document.getElementById('qr-image');
+      qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://script.google.com/macros/s/${SCRIPT_ID}/exec?token=${token}`;
+    }
+
+    // Saat halaman dimuat ulang
+    if (sessionStorage.getItem('qr_login') === 'true') {
+      showQR();
+    }
+  </script>
+</body>
 </html>
