@@ -1,27 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>QR Absensi - SA PROBOLINGGO</title>
+  <title>QR Absensi Teknisi</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     body {
-      margin: 0;
       background-color: #000;
       color: white;
+      font-family: Arial, sans-serif;
       display: flex;
       flex-direction: column;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       height: 100vh;
-      font-family: Arial, sans-serif;
+      margin: 0;
     }
     h1 {
       margin-bottom: 20px;
     }
     #qrcode {
-      background: white;
+      background-color: white;
       padding: 20px;
-      border-radius: 16px;
+      border-radius: 12px;
     }
   </style>
 </head>
@@ -29,38 +29,38 @@
   <h1>Silakan Scan untuk Absen</h1>
   <div id="qrcode"></div>
   <script>
-    const sheetCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR3kGLq8MmEJaxK9nJ5jks6Azm7vovNgAzxxEeWiTBNvvhkWY5zKsiG_VvZjVmfdlR8zPgM6U3-qxla/pub?gid=1339367286&single=true&output=csv';
+    const sheetCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRDwIpFb2xkQHR_aJZRmKG9nQEszi51T8AIvKh9ZRE8Tnu4eePsxznNCfMmaUrJ6xCc_mwXiY11uLSl/pub?gid=481668783&single=true&output=csv';
     let lastToken = "";
 
     function generateQR(link) {
       document.getElementById("qrcode").innerHTML = "";
       new QRCode(document.getElementById("qrcode"), {
         text: link,
-        width: 300,
-        height: 300
+        width: 280,
+        height: 280
       });
     }
 
     async function fetchToken() {
       try {
-        const response = await fetch(sheetCSV);
-        const csvText = await response.text();
-        const lines = csvText.trim().split("\n");
-        const token = lines[1]?.split(',')[0]?.trim(); // Ambil token dari A2
+        const res = await fetch(sheetCSV);
+        const csv = await res.text();
+        const lines = csv.trim().split("\n");
+        const token = lines[1]?.split(",")[0]?.trim();
 
         if (token && token !== lastToken) {
           lastToken = token;
-          const qrLink = `https://absen.cetikeren.com/absen?token=${token}`;
-          generateQR(qrLink);
-          console.log("QR diupdate:", token);
+          const url = `https://absen.cetikeren.com/absen?token=${token}`;
+          generateQR(url);
+          console.log("QR updated:", token);
         }
-      } catch (e) {
-        console.error("Gagal ambil token:", e);
+      } catch (err) {
+        console.error("Gagal ambil token:", err);
       }
     }
 
     fetchToken();
-    setInterval(fetchToken, 3000);
+    setInterval(fetchToken, 3000); // cek setiap 3 detik
   </script>
 </body>
 </html>
