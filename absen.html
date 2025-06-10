@@ -1,55 +1,86 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Absen Teknisi</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <title>QR Absensi Teknisi</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     body {
-      font-family: sans-serif;
-      text-align: center;
-      padding-top: 50px;
-      background-color: #f1f1f1;
-    }
-    h2 {
-      margin-bottom: 10px;
-    }
-    p {
-      margin-bottom: 30px;
-    }
-    button {
-      padding: 15px 25px;
-      font-size: 1.2rem;
-      border: none;
-      border-radius: 8px;
-      background-color: green;
+      background-color: #000;
       color: white;
-      cursor: pointer;
+      font-family: 'Arial', sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    h1 {
+      margin-bottom: 10px;
+      font-size: 2rem;
+    }
+    #clock {
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin-bottom: 20px;
+      letter-spacing: 2px;
+    }
+    #qrcode {
+      background-color: white;
+      padding: 20px;
+      border-radius: 12px;
     }
   </style>
 </head>
 <body>
-  <h2>Halo, <span id="nama">...</span></h2>
-  <p>Silakan klik tombol di bawah untuk absen</p>
-  <button onclick="submitAbsen()">Absen Sekarang</button>
+  <h1>Silakan Scan untuk Absen</h1>
+  <div id="clock">--:--:--</div>
+  <div id="qrcode"></div>
 
   <script>
-    const tg = window.Telegram.WebApp;
-    const user = tg.initDataUnsafe?.user;
-    const nama = user?.first_name || "Tidak Diketahui";
-    const id = user?.id || "UNKNOWN";
-    const token = tg.initDataUnsafe?.start_param || "MANUAL"; // ambil token dari startapp
+    const sheetCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRDwIpFb2xkQHR_aJZRmKG9nQEszi51T8AIvKh9ZRE8Tnu4eePsxznNCfMmaUrJ6xCc_mwXiY11uLSl/pub?gid=481668783&single=true&output=csv';
+    let lastToken = "";
 
-    document.getElementById("nama").innerText = nama;
-
-    function submitAbsen() {
-      if (id === "UNKNOWN") {
-        alert("Harap buka halaman ini dari Telegram WebApp agar bisa absen.");
-        return;
-      }
-
-      const url = `https://script.google.com/macros/s/AKfycbwM4weP8mfrj231RwoLBed31-eQbq0SqGrhhPNkA-4G6HlzbubZ0WwXYPRGVDEOND3K/exec?token=${token}&nama=${nama}&id=${id}`;
-      window.location.href = url;
+    function updateClock() {
+      const now = new Date();
+      const jam = now.getHours().toString().padStart(2, '0');
+      const menit = now.getMinutes().toString().padStart(2, '0');
+      const detik = now.getSeconds().toString().padStart(2, '0');
+      document.getElementById("clock").innerText = `${jam}:${menit}:${detik}`;
     }
+
+    function generateQR(link) {
+      document.getElementById("qrcode").innerHTML = "";
+      new QRCode(document.getElementById("qrcode"), {
+        text: link,
+        width: 280,
+        height: 280
+      });
+    }
+
+    async function fetchToken() {
+      try {
+        const res = await fetch(sheetCSV + `&rand=${Math.random()}`); // Tambahan anti-cache
+        const csv = await res.text();
+        const lines = csv.trim().split("\n");
+        const token = lines[1]?.split(",")[0]?.trim();
+
+        if (token && token !== lastToken) {
+          lastToken = token;
+          const url = `https://t.me/absen_TA_bot/absen_teknisi?startapp=${token}`;
+          generateQR(url);
+          console.log("QR updated:", token);
+        }
+
+      } catch (err) {
+        console.error("Gagal ambil token:", err);
+      }
+    }
+
+    fetchToken();
+    setInterval(fetchToken, 3000);
+    setInterval(updateClock, 1000);
+    updateClock();
   </script>
 </body>
 </html>
