@@ -114,7 +114,7 @@
       errorBox.textContent = '⏳ Memeriksa...';
 
       try {
-        const res = await fetch(`https://script.google.com/macros/s/${SCRIPT_ID}/exec?pass=${input}`);
+        const res = await fetch(`https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec?pass=${input}`);
         const data = await res.json();
 
         if (data.valid) {
