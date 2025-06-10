@@ -27,10 +27,20 @@
 </head>
 <body>
   <h1>Silakan Scan untuk Absen</h1>
+  <div id="clock" style="font-size: 2rem; margin-bottom: 20px;"></div>
   <div id="qrcode"></div>
+
   <script>
     const sheetCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRDwIpFb2xkQHR_aJZRmKG9nQEszi51T8AIvKh9ZRE8Tnu4eePsxznNCfMmaUrJ6xCc_mwXiY11uLSl/pub?gid=481668783&single=true&output=csv';
     let lastToken = "";
+
+    function updateClock() {
+      const now = new Date();
+      const jam = now.getHours().toString().padStart(2, '0');
+      const menit = now.getMinutes().toString().padStart(2, '0');
+      const detik = now.getSeconds().toString().padStart(2, '0');
+      document.getElementById("clock").innerText = `${jam}:${menit}:${detik}`;
+    }
 
     function generateQR(link) {
       document.getElementById("qrcode").innerHTML = "";
@@ -60,7 +70,9 @@
     }
 
     fetchToken();
-    setInterval(fetchToken, 3000); // cek setiap 3 detik
+    setInterval(fetchToken, 3000);
+    setInterval(updateClock, 1000);
+    updateClock(); // langsung tampil pas load
   </script>
 </body>
 </html>
