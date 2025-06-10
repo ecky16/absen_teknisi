@@ -34,19 +34,22 @@
 
   <script>
     const tg = window.Telegram.WebApp;
-    const user = tg.initDataUnsafe.user;
-    const nama = user?.first_name || "User";
-    const id = user?.id || "Unknown";
+    const user = tg.initDataUnsafe?.user;
+    const nama = user?.first_name || "Tidak Diketahui";
+    const id = user?.id || "UNKNOWN";
+    const token = tg.initDataUnsafe?.start_param || "MANUAL"; // ambil token dari startapp
 
     document.getElementById("nama").innerText = nama;
 
     function submitAbsen() {
-      const token = "MANUAL"; // Bisa diganti jika ambil dari URL
+      if (id === "UNKNOWN") {
+        alert("Harap buka halaman ini dari Telegram WebApp agar bisa absen.");
+        return;
+      }
+
       const url = `https://script.google.com/macros/s/AKfycbwM4weP8mfrj231RwoLBed31-eQbq0SqGrhhPNkA-4G6HlzbubZ0WwXYPRGVDEOND3K/exec?token=${token}&nama=${nama}&id=${id}`;
       window.location.href = url;
     }
   </script>
 </body>
 </html>
-
-
