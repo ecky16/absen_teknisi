@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>QR Absensi - ALIRAPTI</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      background-color: #000;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    #qrcode {
+      background: white;
+      padding: 20px;
+      border-radius: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Silakan Scan untuk Absen</h1>
+  <div id="qrcode"></div>
+  <script>
+    const sheetCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR3kGLq8MmEJaxK9nJ5jks6Azm7vovNgAzxxEeWiTBNvvhkWY5zKsiG_VvZjVmfdlR8zPgM6U3-qxla/pub?gid=1339367286&single=true&output=csv';
+    let lastToken = "";
+
+    function generateQR(link) {
+      document.getElementById("qrcode").innerHTML = "";
+      new QRCode(document.getElementById("qrcode"), {
+        text: link,
+        width: 300,
+        height: 300
+      });
+    }
+
+    async function fetchToken() {
+      try {
+        const response = await fetch(sheetCSV);
+        const csvText = await response.text();
+        const lines = csvText.trim().split("\n");
+        const token = lines[1]?.split(',')[0]?.trim(); // Ambil token dari A2
+
+        if (token && token !== lastToken) {
+          lastToken = token;
+          const qrLink = `https://absen.cetikeren.com/absen?token=${token}`;
+          generateQR(qrLink);
+          console.log("QR diupdate:", token);
+        }
+      } catch (e) {
+        console.error("Gagal ambil token:", e);
+      }
+    }
+
+    fetchToken();
+    setInterval(fetchToken, 3000);
+  </script>
+</body>
+</html>
