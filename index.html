@@ -29,16 +29,37 @@
       background-color: white;
       padding: 20px;
       border-radius: 12px;
+      display: none;
+    }
+    #passwordSection {
+      margin-top: 20px;
+    }
+    #requestBtn {
+      margin-top: 10px;
+      padding: 8px 16px;
+      font-size: 1rem;
+      background-color: #00aaff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <h1>Silakan Scan untuk Absen</h1>
+  <h1>Masukkan Password untuk Melihat QR</h1>
   <div id="clock">--:--:--</div>
+
+  <div id="passwordSection">
+    <input type="text" id="passwordInput" placeholder="Masukkan password" />
+    <button onclick="cekPassword()">Submit</button>
+    <button id="requestBtn" onclick="mintaPassword()">Minta dari Bot</button>
+  </div>
+
   <div id="qrcode"></div>
 
   <script>
-    const sheetCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRDwIpFb2xkQHR_aJZRmKG9nQEszi51T8AIvKh9ZRE8Tnu4eePsxznNCfMmaUrJ6xCc_mwXiY11uLSl/pub?gid=481668783&single=true&output=csv';
+    const sheetPassCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRDwIpFb2xkQHR_aJZRmKG9nQEszi51T8AIvKh9ZRE8Tnu4eePsxznNCfMmaUrJ6xCc_mwXiY11uLSl/pub?gid=1479915128&single=true&output=csv';
+    const sheetTokenCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRDwIpFb2xkQHR_aJZRmKG9nQEszi51T8AIvKh9ZRE8Tnu4eePsxznNCfMmaUrJ6xCc_mwXiY11uLSl/pub?gid=481668783&single=true&output=csv';
     let lastToken = "";
 
     function updateClock() {
@@ -49,18 +70,31 @@
       document.getElementById("clock").innerText = `${jam}:${menit}:${detik}`;
     }
 
-    function generateQR(link) {
-      document.getElementById("qrcode").innerHTML = "";
-      new QRCode(document.getElementById("qrcode"), {
-        text: link,
-        width: 280,
-        height: 280
-      });
+    function mintaPassword() {
+      window.location.href = "https://t.me/absen_TA_bot?start=GETQR";
     }
 
-    async function fetchToken() {
+    async function cekPassword() {
+      const inputPass = document.getElementById("passwordInput").value.trim();
       try {
-        const res = await fetch(sheetCSV);
+        const res = await fetch(sheetPassCSV + `&rand=${Math.random()}`);
+        const csv = await res.text();
+        const lines = csv.trim().split("\n");
+        const pass = lines[0]?.split(",")[0]?.trim();
+
+        if (inputPass.toUpperCase() === pass.toUpperCase()) {
+          tampilkanQR();
+        } else {
+          alert("Password salah!");
+        }
+      } catch (err) {
+        alert("Gagal ambil password");
+      }
+    }
+
+    async function tampilkanQR() {
+      try {
+        const res = await fetch(sheetTokenCSV + `&rand=${Math.random()}`);
         const csv = await res.text();
         const lines = csv.trim().split("\n");
         const token = lines[1]?.split(",")[0]?.trim();
@@ -68,17 +102,21 @@
         if (token && token !== lastToken) {
           lastToken = token;
           const url = `https://t.me/absen_TA_bot/absen_teknisi?startapp=${token}`;
-          generateQR(url);
-          console.log("QR updated:", token);
+          document.getElementById("qrcode").innerHTML = "";
+          new QRCode(document.getElementById("qrcode"), {
+            text: url,
+            width: 280,
+            height: 280
+          });
+          document.getElementById("qrcode").style.display = "block";
+          document.getElementById("passwordSection").style.display = "none";
+          document.querySelector("h1").innerText = "Silakan Scan untuk Absen";
         }
-
       } catch (err) {
         console.error("Gagal ambil token:", err);
       }
     }
 
-    fetchToken();
-    setInterval(fetchToken, 3000);
     setInterval(updateClock, 1000);
     updateClock();
   </script>
