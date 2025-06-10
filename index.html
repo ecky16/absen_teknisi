@@ -1,161 +1,30 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>QR Absen</title>
-  <style>
-    body {
-      background-color: black;
-      color: white;
-      font-family: monospace;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
+async function showQR() {
+  document.getElementById('password-form').style.display = 'none';
+  document.getElementById('qr-section').style.display = 'flex';
+  startClock();
+
+  try {
+    const sheetAPI = `https://opensheet.elk.sh/${SHEET_ID}/token_qr`;
+    const res = await fetch(sheetAPI);
+    const rows = await res.json();
+
+    console.log('DEBUG row:', rows[0]); // tampilkan isi persis baris 0
+    const keys = Object.keys(rows[0]);
+    console.log('DEBUG keys:', keys); // tampilkan semua nama kolom
+
+    // Cari kolom yang mengandung kata "Token"
+    const tokenKey = keys.find(k => k.toLowerCase().includes("token"));
+    const token = rows[0][tokenKey];
+
+    if (!token) {
+      document.getElementById('qr-image').alt = '❌ Token kosong atau tidak ditemukan';
+      return;
     }
 
-    #datetime {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-
-    #date {
-      font-size: 28px;
-    }
-
-    #clock {
-      font-size: 60px;
-      margin-top: 10px;
-    }
-
-    #password-form {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    input {
-      padding: 10px;
-      font-size: 20px;
-      border: none;
-      border-radius: 4px;
-      margin-bottom: 10px;
-    }
-
-    button {
-      padding: 10px 20px;
-      font-size: 18px;
-      background-color: #4caf50;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    #error-message {
-      color: red;
-      margin-top: 10px;
-    }
-
-    #qr-section {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    #qr-image {
-      margin-top: 20px;
-    }
-  </style>
-</head>
-<body>
-  <div id="password-form">
-    <input type="text" id="passwordInput" placeholder="Masukkan Password" autocomplete="off" />
-    <button onclick="checkPassword()">Masuk</button>
-    <div id="error-message"></div>
-  </div>
-
-  <div id="qr-section">
-    <div id="datetime">
-      <div id="date">Memuat tanggal...</div>
-      <div id="clock">00:00:00</div>
-    </div>
-    <img id="qr-image" src="" width="220" alt="Memuat QR..." />
-  </div>
-
-  <script>
-    // Gunakan ID dari Eki
-    const SCRIPT_ID = 'AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO';
-    const SHEET_ID = '1wqYmtZ_PS8Ao-gpCBjqdSi1MmzotBmZa1BeALFmUuu4';
-
-    function updateClock() {
-      const now = new Date();
-      const hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-      const bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-      const tanggal = `${hari[now.getDay()]}, ${now.getDate()} ${bulan[now.getMonth()]} ${now.getFullYear()}`;
-      const waktu = now.toLocaleTimeString('id-ID');
-
-      document.getElementById('date').innerText = tanggal;
-      document.getElementById('clock').innerText = waktu;
-    }
-
-    function startClock() {
-      updateClock();
-      setInterval(updateClock, 1000);
-    }
-
-    async function checkPassword() {
-      const input = document.getElementById('passwordInput').value.trim();
-      const errorBox = document.getElementById('error-message');
-      errorBox.textContent = '⏳ Memeriksa...';
-
-      try {
-        const res = await fetch(`https://script.google.com/macros/s/${SCRIPT_ID}/exec?pass=${input}`);
-        const data = await res.json();
-
-        if (data.valid) {
-          sessionStorage.setItem('qr_login', 'true');
-          await showQR();
-        } else {
-          errorBox.textContent = '❌ Password salah';
-        }
-      } catch (err) {
-        errorBox.textContent = '⚠️ Gagal menghubungi server';
-      }
-    }
-
-    async function showQR() {
-      document.getElementById('password-form').style.display = 'none';
-      document.getElementById('qr-section').style.display = 'flex';
-      startClock();
-
-      try {
-        const sheetAPI = `https://opensheet.elk.sh/${SHEET_ID}/token_qr`;
-        const res = await fetch(sheetAPI);
-        const rows = await res.json();
-        console.log('DEBUG rows:', rows);
-
-        const token = rows[0]?.["Token Aktif"];
-
-        if (!token) {
-          document.getElementById('qr-image').alt = '❌ Token kosong atau tidak ditemukan';
-          return;
-        }
-
-        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://script.google.com/macros/s/${SCRIPT_ID}/exec?token=${token}`;
-        document.getElementById('qr-image').src = qrUrl;
-      } catch (err) {
-        document.getElementById('qr-image').alt = '❌ QR gagal dimuat';
-      }
-    }
-
-    window.onload = async () => {
-      if (sessionStorage.getItem('qr_login') === 'true') {
-        await showQR();
-      }
-    };
-  </script>
-</body>
-</html>
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://script.google.com/macros/s/${SCRIPT_ID}/exec?token=${token}`;
+    document.getElementById('qr-image').src = qrUrl;
+  } catch (err) {
+    document.getElementById('qr-image').alt = '❌ QR gagal dimuat';
+    console.error('Gagal:', err);
+  }
+}
