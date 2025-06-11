@@ -32,8 +32,25 @@
       document.getElementById("jam").textContent = `${hari}, ${tanggal} — ${jam}`;
     }
 
+    async function loadQR() {
+      const tokenUrl = "https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec?getToken=1";
+      try {
+        const res = await fetch(tokenUrl);
+        const token = await res.text();
+        const qrLink = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://t.me/absen_TA_bot?start=" + encodeURIComponent(token);
+        document.getElementById("qr-img").src = qrLink;
+      } catch (e) {
+        document.getElementById("qr").innerHTML = "<p style='color:red;'>Gagal memuat QR Code. Cek koneksi atau WebApp Script!</p>";
+        console.error("QR Load Error:", e);
+      }
+    }
+
     setInterval(updateWaktu, 1000);
-    window.onload = updateWaktu;
+    window.onload = function () {
+      updateWaktu();
+      loadQR();
+      setInterval(loadQR, 10000); // update QR setiap 10 detik
+    };
   </script>
 </head>
 <body>
@@ -44,22 +61,5 @@
     <img id="qr-img" src="" alt="QR Dinamis" width="250" height="250">
     <p>Scan QR dari layar ini untuk langsung absen ke bot Telegram</p>
   </div>
-
-  <script>
-    async function loadQR() {
-      const tokenUrl = "https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec?getToken=1";
-      try {
-        const res = await fetch(tokenUrl);
-        const token = await res.text();
-        const qrURL = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://t.me/absen_TA_bot?start=" + token;
-        document.getElementById("qr-img").src = qrURL;
-      } catch (e) {
-        console.error("Gagal mengambil token:", e);
-      }
-    }
-
-    loadQR();              // pertama kali
-    setInterval(loadQR, 10000);  // update QR setiap 10 detik
-  </script>
 </body>
 </html>
