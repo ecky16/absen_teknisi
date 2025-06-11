@@ -47,8 +47,7 @@
 
   <script>
     async function loadQR() {
-      const tokenUrl = "https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO
-/exec?getToken=1";
+      const tokenUrl = "https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec?getToken=1";
       try {
         const res = await fetch(tokenUrl);
         const token = await res.text();
