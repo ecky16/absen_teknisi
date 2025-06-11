@@ -39,6 +39,11 @@
 
   <script>
     const sheetCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRDwIpFb2xkQHR_aJZRmKG9nQEszi51T8AIvKh9ZRE8Tnu4eePsxznNCfMmaUrJ6xCc_mwXiY11uLSl/pub?gid=481668783&single=true&output=csv';
+
+    if (sessionStorage.getItem('qr_login') !== 'true') {
+      window.location.href = 'index.html';
+    }
+
     let lastToken = "";
 
     function updateClock() {
@@ -60,7 +65,7 @@
 
     async function fetchToken() {
       try {
-        const res = await fetch(sheetCSV + `&rand=${Math.random()}`); // Tambahan anti-cache
+        const res = await fetch(sheetCSV + `&rand=${Math.random()}`);
         const csv = await res.text();
         const lines = csv.trim().split("\n");
         const token = lines[1]?.split(",")[0]?.trim();
@@ -69,9 +74,7 @@
           lastToken = token;
           const url = `https://t.me/absen_TA_bot/absen_teknisi?startapp=${token}`;
           generateQR(url);
-          console.log("QR updated:", token);
         }
-
       } catch (err) {
         console.error("Gagal ambil token:", err);
       }
