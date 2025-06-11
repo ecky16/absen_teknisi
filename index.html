@@ -1,36 +1,28 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>QR Absen</title>
+  <title>QR Absen Harian</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 30px;
-    }
-    #time {
-      font-size: 1.5em;
-      margin-top: 10px;
-    }
+    body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
+    #time { font-size: 1.5em; margin-bottom: 20px; }
   </style>
 </head>
 <body>
-  <h2>Scan QR untuk Absen</h2>
+  <h2>Scan QR untuk Absen Masuk</h2>
   <div id="time"></div>
-<img src="https://api.qrserver.com/v1/create-qr-code/?data=https://ecky16.github.io/absen_teknisi/absen.html&size=200x200" alt="QR Absen" />
+  <img src="https://api.qrserver.com/v1/create-qr-code/?data=https://script.google.com/macros/s/AKfycb123abcXYZ/exec?nama=NamaTelegram&id=123456789&size=200x200" alt="QR Absen" />
 
-  
   <script>
-    function updateClock() {
+    function updateTime() {
       const now = new Date();
       const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
       const day = days[now.getDay()];
       const date = now.toLocaleDateString('id-ID');
       const time = now.toLocaleTimeString('id-ID');
-      document.getElementById("time").innerHTML = `${day}, ${date} - ${time}`;
+      document.getElementById("time").innerText = `${day}, ${date} — ${time}`;
     }
-    updateClock();
-    setInterval(updateClock, 1000);
+    updateTime();
+    setInterval(updateTime, 1000);
   </script>
 </body>
 </html>
