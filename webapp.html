@@ -11,13 +11,19 @@
     tg.ready();
 
     const user = tg.initDataUnsafe.user || {};
-    const token = tg.initDataUnsafe.start_param || "-";
 
-    const nama = encodeURIComponent(user.first_name || "Unknown");
-    const id = encodeURIComponent(user.id || "Unknown");
+    fetch("https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec")
+      .then(res => res.text())
+      .then(token => {
+        const nama = encodeURIComponent(user.first_name || "Unknown");
+        const id = encodeURIComponent(user.id || "Unknown");
 
-    const redirectUrl = `https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec?nama=${nama}&id=${id}&token=${token}`;
-    window.location.href = redirectUrl;
+        const redirectUrl = `https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec?nama=${nama}&id=${id}&token=${token}`;
+        window.location.href = redirectUrl;
+      })
+      .catch(() => {
+        document.body.innerHTML = "<p>Gagal memuat token. Coba lagi.</p>";
+      });
   </script>
 </body>
 </html>
