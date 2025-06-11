@@ -23,8 +23,9 @@
     async function loadQR() {
       const res = await fetch("https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec");
       const token = await res.text();
-      const link = `https://t.me/absen_TA_bot?startapp=Absensi_TA`; // tetap
-      document.getElementById("qr").src = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(link)}&size=200x200`;
+      const link = `tg://resolve?domain=absen_TA_bot&startapp=Absensi_TA`;
+document.getElementById("qr").src = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(link)}&size=200x200`;
+
     }
 
     updateTime();
