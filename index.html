@@ -3,14 +3,21 @@
 <head>
   <title>QR Absen Harian</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
-    #time { font-size: 1.5em; margin-bottom: 20px; }
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 50px;
+    }
+    #time {
+      font-size: 1.5em;
+      margin-bottom: 20px;
+    }
   </style>
 </head>
 <body>
   <h2>Scan QR untuk Absen Masuk</h2>
   <div id="time"></div>
-  <img src="https://api.qrserver.com/v1/create-qr-code/?data=https://script.google.com/macros/s/AKfycb123abcXYZ/exec?nama=NamaTelegram&id=123456789&size=200x200" alt="QR Absen" />
+  <img id="qr" src="" alt="QR Absen" />
 
   <script>
     function updateTime() {
@@ -23,6 +30,17 @@
     }
     updateTime();
     setInterval(updateTime, 1000);
+
+    async function loadQR() {
+      const res = await fetch("https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec?action=get_token");
+      const token = await res.text();
+      const qrUrl = `https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec?token=${token}`;
+      document.getElementById("qr").src =
+        `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(qrUrl)}&size=200x200`;
+    }
+
+    loadQR();
+    setInterval(loadQR, 60000); // Refresh QR tiap 60 detik
   </script>
 </body>
 </html>
