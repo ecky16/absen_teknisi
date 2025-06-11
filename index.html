@@ -37,10 +37,11 @@
       try {
         const res = await fetch(tokenUrl);
         const token = await res.text();
-        const qrURL = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" + encodeURIComponent("tg://resolve?domain=absen_TA_bot&start=" + token);
+        const qrLink = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" +
+                       encodeURIComponent("tg://resolve?domain=absen_TA_bot&start=" + token);
         document.getElementById("qr-img").src = qrLink;
       } catch (e) {
-        document.getElementById("qr").innerHTML = "<p style='color:red;'>Gagal memuat QR Code. Cek koneksi atau WebApp Script!</p>";
+        document.getElementById("qr").innerHTML = "<p style='color:red;'>❌ Gagal memuat QR Code. Cek koneksi atau WebApp Script!</p>";
         console.error("QR Load Error:", e);
       }
     }
@@ -59,7 +60,7 @@
 
   <div id="qr">
     <img id="qr-img" src="" alt="QR Dinamis" width="250" height="250">
-    <p>Scan QR dari layar ini untuk langsung absen ke bot Telegram</p>
+    <p>Scan QR di layar ini untuk langsung absen ke bot Telegram</p>
   </div>
 </body>
 </html>
