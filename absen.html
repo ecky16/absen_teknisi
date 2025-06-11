@@ -1,4 +1,3 @@
-<!-- absen.html -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -70,6 +69,7 @@
           lastToken = token;
           const url = `https://t.me/absen_TA_bot/absen_teknisi?startapp=${token}`;
           generateQR(url);
+          console.log("QR updated:", token);
         }
       } catch (err) {
         console.error("Gagal ambil token:", err);
