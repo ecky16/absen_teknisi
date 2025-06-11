@@ -1,37 +1,10 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>QR Absen Telegram</title>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 50px; }
-    #time { font-size: 1.2em; margin-bottom: 20px; }
-  </style>
-</head>
-<body>
-  <h2>Scan QR untuk Absen</h2>
-  <div id="time"></div>
-  <img id="qr" src="" alt="QR Absen" />
-
-  <script>
-    function updateTime() {
-      const now = new Date();
-      const hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-      document.getElementById("time").innerText =
-        `${hari[now.getDay()]}, ${now.toLocaleDateString('id-ID')} - ${now.toLocaleTimeString('id-ID')}`;
-    }
-
- async function loadQR() {
-  const res = await fetch("https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec");
-  const token = await res.text();
-  const link = `https://ecky16.github.io/absen_teknisi/redirect.html`; // Ganti link QR ke redirect.html
-  document.getElementById("qr").src = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(link)}&size=200x200`;
-}
-
-
-    updateTime();
-    setInterval(updateTime, 1000);
-    loadQR();
-    setInterval(loadQR, 15000); // QR berubah tiap 15 detik
-  </script>
-</body>
+  <head>
+    <meta http-equiv="refresh" content="0; url=https://script.google.com/macros/s/AKTIFKAN_SCRIPT/exec" />
+    <title>Mengalihkan ke Bot Telegram...</title>
+  </head>
+  <body>
+    <p>QR diterima, sedang mengalihkan ke bot Telegram...</p>
+  </body>
 </html>
