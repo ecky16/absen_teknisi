@@ -11,53 +11,48 @@
       font-family: monospace;
       display: flex;
       flex-direction: column;
-      align-items: center;
       justify-content: center;
-      height: 100vh;
+      align-items: center;
       text-align: center;
+      height: 100vh;
       margin: 0;
     }
     h1 {
-      font-size: 1.6rem;
-      color: #00ff99;
+      color: #4caf50;
+      font-size: 1.8em;
     }
     p {
-      margin: 8px 0;
-      font-size: 1rem;
+      margin: 10px 0;
     }
   </style>
 </head>
 <body>
-  <h1>✅ Terima kasih, <span id="nama">...</span>!</h1>
-  <p>Anda sudah absen</p>
-  <p id="tanggal"></p>
-  <p id="jam"></p>
+  <h1>✅ Absen Berhasil</h1>
+  <p id="nama">Memuat nama...</p>
+  <p id="waktu">Memuat waktu...</p>
 
   <script>
     Telegram.WebApp.ready();
 
-    const tg = Telegram.WebApp;
-    const user = tg.initDataUnsafe.user || {};
-    const nama = user.first_name || "Tanpa Nama";
-    const id = user.id || "Unknown";
-    const token = tg.initDataUnsafe.start_param || "";
+    const user = Telegram.WebApp.initDataUnsafe.user;
+    const token = new URLSearchParams(window.location.search).get("token");
 
-    document.getElementById("nama").innerText = nama;
+    const nama = user?.first_name || "Tanpa Nama";
+    const id = user?.id || "Unknown";
 
-    // Format tanggal dan jam
     const now = new Date();
     const hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
     const bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+    const hariIni = `${hari[now.getDay()]}, ${now.getDate()} ${bulan[now.getMonth()]} ${now.getFullYear()}`;
+    const jam = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
 
-    const tanggalStr = `${hari[now.getDay()]}, ${now.getDate()} ${bulan[now.getMonth()]} ${now.getFullYear()}`;
-    const jamStr = now.toLocaleTimeString('id-ID');
+    document.getElementById("nama").innerText = `👤 ${nama}`;
+    document.getElementById("waktu").innerText = `🗓️ ${hariIni} • ${jam}`;
 
-    document.getElementById("tanggal").innerText = `📅 ${tanggalStr}`;
-    document.getElementById("jam").innerText = `🕒 ${jamStr}`;
-
-    // Kirim ke Apps Script
     const url = `https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec?token=${token}&nama=${encodeURIComponent(nama)}&id=${id}`;
-    fetch(url).then(() => setTimeout(() => tg.close(), 4000));
+    fetch(url).then(() => {
+      setTimeout(() => Telegram.WebApp.close(), 6000);
+    });
   </script>
 </body>
 </html>
