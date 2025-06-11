@@ -1,84 +1,26 @@
-
 <!DOCTYPE html>
 <html>
 <head>
-  <title>QR Absensi Publik</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <style>
-    body {
-      background-color: #000;
-      color: white;
-      font-family: 'Arial', sans-serif;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
+  <title>Absen Teknisi</title>
+  <script>
+    async function submitToken() {
+      const token = document.getElementById("token").value;
+      const response = await fetch('https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `token=${token}`
+      });
+      const text = await response.text();
+      document.getElementById("result").innerText = text;
     }
-    h1 {
-      margin-bottom: 10px;
-      font-size: 2rem;
-    }
-    #clock {
-      font-size: 2.5rem;
-      font-weight: bold;
-      margin-bottom: 20px;
-      letter-spacing: 2px;
-    }
-    #qrcode {
-      background-color: white;
-      padding: 20px;
-      border-radius: 12px;
-    }
-  </style>
+  </script>
 </head>
 <body>
-  <h1>Silakan Scan untuk Absen</h1>
-  <div id="clock">--:--:--</div>
-  <div id="qrcode"></div>
-
-  <script>
-    const sheetCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRDwIpFb2xkQHR_aJZRmKG9nQEszi51T8AIvKh9ZRE8Tnu4eePsxznNCfMmaUrJ6xCc_mwXiY11uLSl/pub?gid=481668783&single=true&output=csv';
-    const linkPrefix = 'https://t.me/absen_TA_bot/Absen_TA?startapp=';
-    let lastToken = "";
-
-    function updateClock() {
-      const now = new Date();
-      const jam = now.getHours().toString().padStart(2, '0');
-      const menit = now.getMinutes().toString().padStart(2, '0');
-      const detik = now.getSeconds().toString().padStart(2, '0');
-      document.getElementById("clock").innerText = `${jam}:${menit}:${detik}`;
-    }
-
-    function generateQR(link) {
-      document.getElementById("qrcode").innerHTML = "";
-      new QRCode(document.getElementById("qrcode"), {
-        text: link,
-        width: 280,
-        height: 280
-      });
-    }
-
-    async function fetchToken() {
-      try {
-        const res = await fetch(sheetCSV + `&rand=${Math.random()}`);
-        const csv = await res.text();
-        const lines = csv.trim().split("\n");
-        const token = lines[1]?.split(",")[0]?.trim();
-        if (token && token !== lastToken) {
-          lastToken = token;
-          generateQR(linkPrefix + token);
-        }
-      } catch (err) {
-        console.error("Gagal ambil token:", err);
-      }
-    }
-
-    fetchToken();
-    setInterval(fetchToken, 3000);
-    setInterval(updateClock, 1000);
-    updateClock();
-  </script>
+  <h2>Masukkan Token Absen</h2>
+  <input type="text" id="token" placeholder="Masukkan token di sini" />
+  <button onclick="submitToken()">Absen</button>
+  <p id="result"></p>
 </body>
 </html>
