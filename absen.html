@@ -1,3 +1,4 @@
+<!-- absen.html -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -39,11 +40,6 @@
 
   <script>
     const sheetCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRDwIpFb2xkQHR_aJZRmKG9nQEszi51T8AIvKh9ZRE8Tnu4eePsxznNCfMmaUrJ6xCc_mwXiY11uLSl/pub?gid=481668783&single=true&output=csv';
-
-    if (sessionStorage.getItem('qr_login') !== 'true') {
-      window.location.href = 'index.html';
-    }
-
     let lastToken = "";
 
     function updateClock() {
