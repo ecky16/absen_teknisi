@@ -12,15 +12,16 @@
     const tg = window.Telegram.WebApp;
     tg.expand();
 
-    const user = tg.initDataUnsafe.user;
-    const token = tg.initDataUnsafe.start_param;
+    // Ambil user & token dari Telegram WebApp
+    const user = tg.initDataUnsafe.user || {};
+    const token = tg.initDataUnsafe.start_param || "-";
 
-    document.getElementById("title").innerText = `Hai ${user.first_name}!`;
+    document.getElementById("title").innerText = `Hai ${user.first_name || 'User'}!`;
 
     document.getElementById("absenBtn").addEventListener("click", async () => {
       const payload = {
-        nama: user.first_name,
-        id: user.id,
+        nama: user.first_name || "Unknown",
+        id: user.id || "Unknown",
         token: token
       };
 
@@ -34,9 +35,10 @@
 
       const text = await res.text();
       if (text === "ok") {
+        alert("Absen berhasil!");
         tg.close();
       } else {
-        alert("Gagal absen.");
+        alert("Gagal absen: " + text);
       }
     });
   </script>
