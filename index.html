@@ -3,8 +3,15 @@
 <head>
   <title>QR Absen Telegram</title>
   <style>
-    body { font-family: Arial; text-align: center; padding: 50px; }
-    #time { font-size: 1.3em; margin-bottom: 20px; }
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 50px;
+    }
+    #time {
+      font-size: 1.3em;
+      margin-bottom: 20px;
+    }
   </style>
 </head>
 <body>
@@ -16,20 +23,20 @@
     function updateTime() {
       const now = new Date();
       const hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-      document.getElementById("time").innerText = `${hari[now.getDay()]}, ${now.toLocaleDateString('id-ID')} - ${now.toLocaleTimeString('id-ID')}`;
+      document.getElementById("time").innerText =
+        `${hari[now.getDay()]}, ${now.toLocaleDateString('id-ID')} - ${now.toLocaleTimeString('id-ID')}`;
     }
+
+    function setQR() {
+      const link = "https://t.me/absen_TA_bot/Absensi_TA";
+      const encoded = encodeURIComponent(link);
+      document.getElementById("qr").src =
+        `https://api.qrserver.com/v1/create-qr-code/?data=${encoded}&size=200x200`;
+    }
+
     updateTime();
+    setQR();
     setInterval(updateTime, 1000);
-
-    async function loadQR() {
-      const res = await fetch("https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec");
-      const token = await res.text();
-      const link = `https://t.me/absen_TA_bot?startapp=${token}`;
-      document.getElementById("qr").src = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(link)}&size=200x200`;
-    }
-
-    loadQR();
-    setInterval(loadQR, 60000);
   </script>
 </body>
 </html>
