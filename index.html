@@ -1,0 +1,109 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>QR Absen (Admin)</title>
+  <style>
+    body {
+      background-color: black;
+      color: white;
+      font-family: monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    #datetime {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    #clock { font-size: 48px; }
+    #qrcode { margin-top: 20px; background: white; padding: 20px; border-radius: 12px; }
+    input, button {
+      padding: 10px;
+      font-size: 18px;
+      margin: 5px;
+      border-radius: 6px;
+      border: none;
+    }
+    #error-message { color: red; margin-top: 10px; }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+  <div id="form">
+    <input type="text" id="otp" placeholder="Masukkan OTP Password" />
+    <button onclick="checkOTP()">Masuk</button>
+    <div id="error-message"></div>
+  </div>
+
+  <div id="qr-view" style="display:none;flex-direction:column;align-items:center;">
+    <div id="datetime">
+      <div id="clock">00:00:00</div>
+    </div>
+    <div id="qrcode"></div>
+  </div>
+
+  <script>
+    const SHEET_URL = 'https://opensheet.elk.sh/1wqYmtZ_PS8Ao-gpCBjqdSi1MmzotBmZa1BeALFmUuu4/token_qr';
+    const WEBAPP_LINK = 'https://t.me/absen_TA_bot/Absen_TA?startapp=';
+
+    function updateClock() {
+      const now = new Date();
+      const jam = now.getHours().toString().padStart(2, '0');
+      const menit = now.getMinutes().toString().padStart(2, '0');
+      const detik = now.getSeconds().toString().padStart(2, '0');
+      document.getElementById("clock").innerText = `${jam}:${menit}:${detik}`;
+    }
+
+    function generateQR(token) {
+      document.getElementById("qrcode").innerHTML = "";
+      new QRCode(document.getElementById("qrcode"), {
+        text: WEBAPP_LINK + token,
+        width: 280,
+        height: 280
+      });
+    }
+
+    async function checkOTP() {
+      const input = document.getElementById('otp').value.trim();
+      const error = document.getElementById('error-message');
+      error.innerText = 'Memeriksa...';
+      try {
+        const res = await fetch(`https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec?pass=${input}`);
+        const data = await res.json();
+        if (data.valid) {
+          document.getElementById('form').style.display = 'none';
+          document.getElementById('qr-view').style.display = 'flex';
+          startQR();
+        } else {
+          error.innerText = '❌ OTP salah';
+        }
+      } catch (err) {
+        error.innerText = '⚠️ Gagal menghubungi server';
+      }
+    }
+
+    async function startQR() {
+      updateClock();
+      setInterval(updateClock, 1000);
+      await fetchAndDrawQR();
+      setInterval(fetchAndDrawQR, 3000);
+    }
+
+    async function fetchAndDrawQR() {
+      try {
+        const res = await fetch(SHEET_URL + `?t=${Math.random()}`);
+        const rows = await res.json();
+        const token = rows[0]?.A;
+        if (token) generateQR(token);
+      } catch (err) {
+        console.error('Gagal ambil token:', err);
+      }
+    }
+  </script>
+</body>
+</html>
