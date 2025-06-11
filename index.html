@@ -37,8 +37,8 @@
       try {
         const res = await fetch(tokenUrl);
         const token = await res.text();
-        const qrData = "tg://resolve?domain=absen_TA_bot&start=" + token;
-        const qrURL = "https://chart.googleapis.com/chart?cht=qr&chs=250x250&chl=" + encodeURIComponent(qrData);
+        const qrData = "https://t.me/absen_TA_bot?start=" + token;
+        const qrURL = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" + encodeURIComponent(qrData);
         document.getElementById("qr-img").src = qrURL;
       } catch (e) {
         document.getElementById("qr").innerHTML = "<p style='color:red;'>❌ Gagal memuat QR Code. Cek koneksi atau WebApp Script!</p>";
