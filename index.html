@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>QR Absen</title>
+  <title>Login QR Absen</title>
   <style>
     body {
       background-color: black;
@@ -15,22 +15,11 @@
       height: 100vh;
       margin: 0;
     }
-    #datetime {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-    #date { font-size: 28px; }
-    #clock { font-size: 60px; margin-top: 10px; }
-    #password-form {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
     input {
       padding: 10px;
       font-size: 20px;
+      border-radius: 5px;
       border: none;
-      border-radius: 4px;
       margin-bottom: 10px;
     }
     button {
@@ -39,112 +28,36 @@
       background-color: #4caf50;
       color: white;
       border: none;
-      border-radius: 4px;
+      border-radius: 5px;
       cursor: pointer;
     }
-    #error-message {
+    #error {
+      margin-top: 15px;
       color: red;
-      margin-top: 10px;
     }
-    #qr-section {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-    }
-    #qr-image { margin-top: 20px; }
   </style>
 </head>
 <body>
-
-  <!-- FORM PASSWORD -->
-  <div id="password-form">
-    <input type="text" id="passwordInput" placeholder="Masukkan Password" autocomplete="off" />
-    <button onclick="checkPassword()">Masuk</button>
-    <div id="error-message"></div>
-  </div>
-
-  <!-- QR MODE -->
-  <div id="qr-section">
-    <div id="datetime">
-      <div id="date">Memuat tanggal...</div>
-      <div id="clock">00:00:00</div>
-    </div>
-    <img id="qr-image" src="" width="220" />
-  </div>
+  <h2>Masukkan Password OTP</h2>
+  <input type="text" id="passInput" placeholder="OTP Password">
+  <button onclick="submitPass()">Masuk</button>
+  <div id="error"></div>
 
   <script>
-    const SCRIPT_ID = 'AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO';
-    const SHEET_ID = '1wqYmtZ_PS8Ao-gpCBjqdSi1MmzotBmZa1BeALFmUuu4';
-    const sheetAPI = `https://opensheet.elk.sh/${SHEET_ID}/token_qr`;
-    let lastToken = "";
+    const SCRIPT_ID = 'AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO'; // Ganti jika berubah
 
-    function updateClock() {
-      const now = new Date();
-      const hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
-      const bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
-      document.getElementById('date').innerText = `${hari[now.getDay()]}, ${now.getDate()} ${bulan[now.getMonth()]} ${now.getFullYear()}`;
-      document.getElementById('clock').innerText = now.toLocaleTimeString('id-ID');
-    }
+    async function submitPass() {
+      const pass = document.getElementById('passInput').value.trim();
+      const res = await fetch(`https://script.google.com/macros/s/${SCRIPT_ID}/exec?pass=${pass}`);
+      const data = await res.json();
 
-    function startClock() {
-      updateClock();
-      setInterval(updateClock, 1000);
-    }
-
-    async function checkPassword() {
-      const input = document.getElementById('passwordInput').value.trim();
-      const errorBox = document.getElementById('error-message');
-      errorBox.textContent = '⏳ Memeriksa...';
-
-      try {
-        const res = await fetch(`https://script.google.com/macros/s/${SCRIPT_ID}/exec?pass=${input}`);
-        const data = await res.json();
-        if (data.valid) {
-          sessionStorage.setItem('qr_login', 'true');
-          showQR();
-        } else {
-          errorBox.textContent = '❌ Password salah';
-        }
-      } catch (err) {
-        errorBox.textContent = '⚠️ Gagal menghubungi server';
+      if (data.valid) {
+        sessionStorage.setItem('qr_login', 'true');
+        window.location.href = 'absen.html';
+      } else {
+        document.getElementById('error').innerText = '❌ Password salah';
       }
     }
-
-    async function showQR() {
-      document.getElementById('password-form').style.display = 'none';
-      document.getElementById('qr-section').style.display = 'flex';
-      startClock();
-      await fetchAndRenderQR();
-      setInterval(fetchAndRenderQR, 5000);
-    }
-
-    async function fetchAndRenderQR() {
-      try {
-        const res = await fetch(sheetAPI + `?rand=${Math.random()}`);
-        const rows = await res.json();
-        const keys = Object.keys(rows[0]);
-        const tokenKey = keys.find(k => k.toLowerCase().includes("token"));
-        const token = rows[0][tokenKey];
-
-        if (!token || token === lastToken) return;
-        lastToken = token;
-
-        const qrLink = `https://t.me/absen_TA_bot/absen_teknisi?startapp=${token}`;
-        document.getElementById('qr-image').src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrLink)}`;
-      } catch (err) {
-        document.getElementById('qr-image').alt = '❌ QR gagal dimuat';
-      }
-    }
-
-    // AUTO LOGIN jika masih sesi aktif
-    if (sessionStorage.getItem('qr_login') === 'true') {
-      showQR();
-    }
-
-    // AUTO LOGOUT saat tab/browser ditutup
-    window.addEventListener('beforeunload', () => {
-      sessionStorage.removeItem('qr_login');
-    });
   </script>
 </body>
 </html>
