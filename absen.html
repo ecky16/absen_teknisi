@@ -67,8 +67,7 @@
 
         if (token && token !== lastToken) {
           lastToken = token;
-          const url = `https://t.me/absen_TA_bot/absen_teknisi?startapp=${token}`;
-
+       const url = `https://t.me/absen_TA_bot/absen_teknisi?startapp=${token}`;
           generateQR(url);
           console.log("QR updated:", token);
         }
