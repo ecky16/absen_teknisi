@@ -1,46 +1,35 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>QR Absen Harian</title>
+  <title>QR Absen Telegram</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 50px;
-    }
-    #time {
-      font-size: 1.5em;
-      margin-bottom: 20px;
-    }
+    body { font-family: Arial; text-align: center; padding: 50px; }
+    #time { font-size: 1.3em; margin-bottom: 20px; }
   </style>
 </head>
 <body>
-  <h2>Scan QR untuk Absen Masuk</h2>
+  <h2>Scan QR untuk Absen</h2>
   <div id="time"></div>
   <img id="qr" src="" alt="QR Absen" />
 
   <script>
     function updateTime() {
       const now = new Date();
-      const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-      const day = days[now.getDay()];
-      const date = now.toLocaleDateString('id-ID');
-      const time = now.toLocaleTimeString('id-ID');
-      document.getElementById("time").innerText = `${day}, ${date} — ${time}`;
+      const hari = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+      document.getElementById("time").innerText = `${hari[now.getDay()]}, ${now.toLocaleDateString('id-ID')} - ${now.toLocaleTimeString('id-ID')}`;
     }
     updateTime();
     setInterval(updateTime, 1000);
 
     async function loadQR() {
-      const res = await fetch("https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec?action=get_token");
+      const res = await fetch("https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec");
       const token = await res.text();
-      const qrUrl = `https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec?token=${token}`;
-      document.getElementById("qr").src =
-        `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(qrUrl)}&size=200x200`;
+      const link = `https://t.me/absen_TA_bot?startapp=${token}`;
+      document.getElementById("qr").src = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(link)}&size=200x200`;
     }
 
     loadQR();
-    setInterval(loadQR, 60000); // Refresh QR tiap 60 detik
+    setInterval(loadQR, 60000);
   </script>
 </body>
 </html>
