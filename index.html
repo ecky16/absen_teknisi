@@ -1,68 +1,58 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>QR Absen TA</title>
+  <title>QR Absen Teknisi</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: sans-serif;
       text-align: center;
-      padding: 40px;
-    }
-    h1 {
-      font-size: 2em;
-    }
-    #jam {
-      font-size: 1.2em;
-      margin-top: 10px;
-      margin-bottom: 30px;
+      padding-top: 50px;
     }
     #qr {
       margin-top: 20px;
     }
-  </style>
-  <script>
-    function updateWaktu() {
-      const hariIndo = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-      const sekarang = new Date();
-      const hari = hariIndo[sekarang.getDay()];
-      const tanggal = sekarang.toLocaleDateString("id-ID");
-      const jam = sekarang.toLocaleTimeString("id-ID");
-
-      document.getElementById("jam").textContent = `${hari}, ${tanggal} — ${jam}`;
+    #waktu {
+      font-size: 18px;
+      font-weight: bold;
     }
-
-  async function loadQR() {
-  const tokenUrl = "https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec?getToken=1";
-  try {
-    const res = await fetch(tokenUrl);
-    const token = await res.text();
-    const timestamp = Date.now();
-    const aliasToken = token + "-" + timestamp;
-    const qrData = "https://t.me/absen_TA_bot?start=" + aliasToken;
-    const qrURL = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" + encodeURIComponent(qrData);
-    document.getElementById("qr-img").src = qrURL;
-  } catch (e) {
-    document.getElementById("qr").innerHTML = "<p style='color:red;'>❌ Gagal memuat QR Code. Cek koneksi atau WebApp Script!</p>";
-    console.error("QR Load Error:", e);
-  }
-}
-
-    setInterval(updateWaktu, 1000);
-    window.onload = function () {
-      updateWaktu();
-      loadQR();
-      setInterval(loadQR, 10000); // update QR setiap 10 detik
-    };
-  </script>
+  </style>
 </head>
 <body>
-  <h1>📌 Scan QR untuk Absen</h1>
-  <div id="jam">Memuat waktu...</div>
-
+  <h2>📲 Scan QR Untuk Absen</h2>
+  <div id="waktu"></div>
   <div id="qr">
-    <img id="qr-img" src="" alt="QR Dinamis" width="250" height="250">
-    <p>Scan QR di layar ini untuk langsung absen lewat bot Telegram</p>
+    <img id="qr-img" src="" alt="Loading QR Code..." />
   </div>
+
+  <script>
+    async function loadQR() {
+      const tokenUrl = "https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec?getToken=1";
+      try {
+        const res = await fetch(tokenUrl);
+        const token = await res.text();
+        const timestamp = Date.now();
+        const aliasToken = token + "-" + timestamp;
+        const qrData = "https://t.me/absen_TA_bot?start=" + aliasToken;
+        const qrURL = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" + encodeURIComponent(qrData);
+        document.getElementById("qr-img").src = qrURL;
+      } catch (e) {
+        document.getElementById("qr").innerHTML = "<p style='color:red;'>❌ Gagal memuat QR Code. Cek koneksi atau WebApp Script!</p>";
+        console.error("QR Load Error:", e);
+      }
+    }
+
+    function updateWaktu() {
+      const now = new Date();
+      const hari = now.toLocaleDateString('id-ID', { weekday: 'long' });
+      const tanggal = now.toLocaleDateString('id-ID');
+      const jam = now.toLocaleTimeString('id-ID');
+      document.getElementById("waktu").innerText = `${hari}, ${tanggal} — ${jam}`;
+    }
+
+    setInterval(updateWaktu, 1000);
+    updateWaktu();
+    loadQR();
+  </script>
 </body>
 </html>
