@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Absen Masuk</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body style="font-family:sans-serif;text-align:center;padding:50px">
+  <h2 id="title">Memuat...</h2>
+  <button id="absenBtn" style="padding: 10px 20px; font-size: 18px;">Masuk</button>
+
+  <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+
+    const user = tg.initDataUnsafe.user;
+    const token = tg.initDataUnsafe.start_param;
+
+    document.getElementById("title").innerText = `Hai ${user.first_name}!`;
+
+    document.getElementById("absenBtn").addEventListener("click", async () => {
+      const payload = {
+        nama: user.first_name,
+        id: user.id,
+        token: token
+      };
+
+      const res = await fetch("https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec", {
+        method: "POST",
+        body: JSON.stringify(payload),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+
+      const text = await res.text();
+      if (text === "ok") {
+        tg.close();
+      } else {
+        alert("Gagal absen.");
+      }
+    });
+  </script>
+</body>
+</html>
