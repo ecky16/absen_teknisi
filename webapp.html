@@ -1,34 +1,64 @@
-
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Absen Teknisi</title>
-    <script>
-      window.onload = async () => {
-        const params = new URLSearchParams(window.location.search);
-        const token = params.get("startapp");
+<head>
+  <meta charset="UTF-8" />
+  <title>WebApp Absen</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body {
+      background-color: black;
+      color: white;
+      font-family: monospace;
+      text-align: center;
+      padding-top: 80px;
+    }
 
-        if (!window.Telegram.WebApp.initDataUnsafe?.user) {
-          document.body.innerHTML = `<h3 style="color:red;">❌ Telegram tidak ditemukan</h3>`;
-          return;
-        }
+    button {
+      margin-top: 20px;
+      padding: 14px 28px;
+      font-size: 18px;
+      background-color: white;
+      color: green;
+      border: none;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h2 id="info">⏳ Memuat...</h2>
+  <button id="btn" style="display:none;">✅ Klik untuk Absen</button>
 
-        const nama = window.Telegram.WebApp.initDataUnsafe.user.first_name;
-        const id = window.Telegram.WebApp.initDataUnsafe.user.id;
+  <script>
+    window.onload = async () => {
+      const tg = window.Telegram.WebApp;
+      const user = tg.initDataUnsafe?.user;
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get("startapp");
 
-        document.getElementById("info").innerText = `Halo ${nama}! Klik tombol di bawah untuk absen.`;
+      if (!user || !token) {
+        document.getElementById("info").innerText = "❌ Gagal memuat data pengguna atau token.";
+        return;
+      }
 
-        document.getElementById("btn").onclick = async () => {
+      const nama = user.first_name || "Tanpa Nama";
+      const id = user.id;
+
+      document.getElementById("info").innerText = `Halo ${nama}!`;
+      const btn = document.getElementById("btn");
+      btn.style.display = "inline-block";
+
+      btn.onclick = async () => {
+        try {
           const res = await fetch(`https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec?token=${token}&nama=${nama}&id=${id}`);
           const html = await res.text();
-          document.body.innerHTML = html;
-        };
+          document.open();
+          document.write(html);
+          document.close();
+        } catch (err) {
+          document.getElementById("info").innerText = "⚠️ Gagal mengirim absen.";
+        }
       };
-    </script>
-  </head>
-  <body style="background:black;color:white;text-align:center;font-family:sans-serif;padding-top:100px;">
-    <h2 id="info">Memuat...</h2>
-    <button id="btn" style="padding:10px 20px;font-size:18px;">✅ Klik untuk Absen</button>
-  </body>
+    };
+  </script>
+</body>
 </html>
