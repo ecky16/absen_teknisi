@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>QR Absensi Bot Telegram</title>
+  <title>QR Absen TA</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -10,11 +10,12 @@
       padding: 40px;
     }
     h1 {
-      margin-bottom: 0;
+      font-size: 2em;
     }
     #jam {
-      font-size: 1.4em;
-      margin-bottom: 20px;
+      font-size: 1.2em;
+      margin-top: 10px;
+      margin-bottom: 30px;
     }
     #qr {
       margin-top: 20px;
@@ -31,7 +32,6 @@
       document.getElementById("jam").textContent = `${hari}, ${tanggal} — ${jam}`;
     }
 
-    // Perbarui jam setiap detik
     setInterval(updateWaktu, 1000);
     window.onload = updateWaktu;
   </script>
@@ -41,8 +41,26 @@
   <div id="jam">Memuat waktu...</div>
 
   <div id="qr">
-    <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://script.google.com/macros/s/AKTIFKAN_SCRIPT/exec" alt="QR Absen Bot">
-    <p>Scan QR di atas untuk absen melalui bot Telegram</p>
+    <img id="qr-img" src="" alt="QR Dinamis" width="250" height="250">
+    <p>Scan QR dari layar ini untuk langsung absen ke bot Telegram</p>
   </div>
+
+  <script>
+    async function loadQR() {
+      const tokenUrl = "https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO
+/exec?getToken=1";
+      try {
+        const res = await fetch(tokenUrl);
+        const token = await res.text();
+        const qrURL = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=https://t.me/absen_TA_bot?start=" + token;
+        document.getElementById("qr-img").src = qrURL;
+      } catch (e) {
+        console.error("Gagal mengambil token:", e);
+      }
+    }
+
+    loadQR();              // pertama kali
+    setInterval(loadQR, 10000);  // update QR setiap 10 detik
+  </script>
 </body>
 </html>
