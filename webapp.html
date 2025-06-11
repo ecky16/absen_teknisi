@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Absen Teknisi</title>
+  <script>
+    async function absen() {
+      const tg = window.Telegram.WebApp;
+      const nama = tg.initDataUnsafe?.user?.first_name || "Tanpa Nama";
+      const id = tg.initDataUnsafe?.user?.id || "Unknown";
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get("startapp");
+
+      const finalURL = `https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec?token=${token}&nama=${encodeURIComponent(nama)}&id=${id}`;
+
+      try {
+        const res = await fetch(finalURL);
+        const html = await res.text();
+        document.body.innerHTML = html;
+        tg.expand();
+      } catch (e) {
+        document.body.innerHTML = "<h2 style='color:white;text-align:center'>❌ Gagal absen</h2>";
+      }
+    }
+
+    window.onload = absen;
+  </script>
+  <style>
+    body {
+      background-color: black;
+      color: white;
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <p>⏳ Memproses absen...</p>
+</body>
+</html>
