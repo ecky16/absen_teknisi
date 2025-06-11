@@ -32,19 +32,21 @@
       document.getElementById("jam").textContent = `${hari}, ${tanggal} — ${jam}`;
     }
 
-    async function loadQR() {
-      const tokenUrl = "https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec?getToken=1";
-      try {
-        const res = await fetch(tokenUrl);
-        const token = await res.text();
-        const qrData = "https://t.me/absen_TA_bot?start=" + token;
-        const qrURL = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" + encodeURIComponent(qrData);
-        document.getElementById("qr-img").src = qrURL;
-      } catch (e) {
-        document.getElementById("qr").innerHTML = "<p style='color:red;'>❌ Gagal memuat QR Code. Cek koneksi atau WebApp Script!</p>";
-        console.error("QR Load Error:", e);
-      }
-    }
+  async function loadQR() {
+  const tokenUrl = "https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec?getToken=1";
+  try {
+    const res = await fetch(tokenUrl);
+    const token = await res.text();
+    const timestamp = Date.now();
+    const aliasToken = token + "-" + timestamp;
+    const qrData = "https://t.me/absen_TA_bot?start=" + aliasToken;
+    const qrURL = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" + encodeURIComponent(qrData);
+    document.getElementById("qr-img").src = qrURL;
+  } catch (e) {
+    document.getElementById("qr").innerHTML = "<p style='color:red;'>❌ Gagal memuat QR Code. Cek koneksi atau WebApp Script!</p>";
+    console.error("QR Load Error:", e);
+  }
+}
 
     setInterval(updateWaktu, 1000);
     window.onload = function () {
