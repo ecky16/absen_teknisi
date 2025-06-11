@@ -1,9 +1,8 @@
-
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>QR Absen (Admin)</title>
+  <title>QR Absen</title>
   <style>
     body {
       background-color: black;
@@ -16,94 +15,152 @@
       height: 100vh;
       margin: 0;
     }
+
     #datetime {
       text-align: center;
       margin-bottom: 30px;
     }
-    #clock { font-size: 48px; }
-    #qrcode { margin-top: 20px; background: white; padding: 20px; border-radius: 12px; }
-    input, button {
-      padding: 10px;
-      font-size: 18px;
-      margin: 5px;
-      border-radius: 6px;
-      border: none;
+
+    #date {
+      font-size: 28px;
     }
-    #error-message { color: red; margin-top: 10px; }
+
+    #clock {
+      font-size: 60px;
+      margin-top: 10px;
+    }
+
+    #password-form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    input {
+      padding: 10px;
+      font-size: 20px;
+      border: none;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #error-message {
+      color: red;
+      margin-top: 10px;
+    }
+
+    #qr-section {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #qr-image {
+      margin-top: 20px;
+    }
   </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
-  <div id="form">
-    <input type="text" id="otp" placeholder="Masukkan OTP Password" />
-    <button onclick="checkOTP()">Masuk</button>
+  <!-- FORM PASSWORD -->
+  <div id="password-form">
+    <input type="text" id="passwordInput" placeholder="Masukkan Password" autocomplete="off" />
+    <button onclick="checkPassword()">Masuk</button>
     <div id="error-message"></div>
   </div>
 
-  <div id="qr-view" style="display:none;flex-direction:column;align-items:center;">
+  <!-- QR MODE -->
+  <div id="qr-section">
     <div id="datetime">
+      <div id="date">Memuat tanggal...</div>
       <div id="clock">00:00:00</div>
     </div>
-    <div id="qrcode"></div>
+    <img id="qr-image" src="" width="220" />
   </div>
 
   <script>
-    const SHEET_URL = 'https://opensheet.elk.sh/1wqYmtZ_PS8Ao-gpCBjqdSi1MmzotBmZa1BeALFmUuu4/token_qr';
-    const WEBAPP_LINK = 'https://t.me/absen_TA_bot/Absen_TA?startapp=';
+    const SCRIPT_ID = 'AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO';
+    const SHEET_ID = '1wqYmtZ_PS8Ao-gpCBjqdSi1MmzotBmZa1BeALFmUuu4';
 
     function updateClock() {
       const now = new Date();
-      const jam = now.getHours().toString().padStart(2, '0');
-      const menit = now.getMinutes().toString().padStart(2, '0');
-      const detik = now.getSeconds().toString().padStart(2, '0');
-      document.getElementById("clock").innerText = `${jam}:${menit}:${detik}`;
+      const hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+      const bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+
+      const tanggal = `${hari[now.getDay()]}, ${now.getDate()} ${bulan[now.getMonth()]} ${now.getFullYear()}`;
+      const waktu = now.toLocaleTimeString('id-ID');
+
+      document.getElementById('date').innerText = tanggal;
+      document.getElementById('clock').innerText = waktu;
     }
 
-    function generateQR(token) {
-      document.getElementById("qrcode").innerHTML = "";
-      new QRCode(document.getElementById("qrcode"), {
-        text: WEBAPP_LINK + token,
-        width: 280,
-        height: 280
-      });
+    function startClock() {
+      updateClock();
+      setInterval(updateClock, 1000);
     }
 
-    async function checkOTP() {
-      const input = document.getElementById('otp').value.trim();
-      const error = document.getElementById('error-message');
-      error.innerText = 'Memeriksa...';
+    async function checkPassword() {
+      const input = document.getElementById('passwordInput').value.trim();
+      const errorBox = document.getElementById('error-message');
+      errorBox.textContent = '⏳ Memeriksa...';
+
       try {
-        const res = await fetch(`https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec?pass=${input}`);
+        const res = await fetch(`https://script.google.com/macros/s/${SCRIPT_ID}/exec?pass=${input}`);
         const data = await res.json();
+
         if (data.valid) {
-          document.getElementById('form').style.display = 'none';
-          document.getElementById('qr-view').style.display = 'flex';
-          startQR();
+          sessionStorage.setItem('qr_login', 'true');
+          await showQR();
         } else {
-          error.innerText = '❌ OTP salah';
+          errorBox.textContent = '❌ Password salah';
         }
       } catch (err) {
-        error.innerText = '⚠️ Gagal menghubungi server';
+        errorBox.textContent = '⚠️ Gagal menghubungi server';
       }
     }
 
-    async function startQR() {
-      updateClock();
-      setInterval(updateClock, 1000);
-      await fetchAndDrawQR();
-      setInterval(fetchAndDrawQR, 3000);
-    }
+    async function showQR() {
+      document.getElementById('password-form').style.display = 'none';
+      document.getElementById('qr-section').style.display = 'flex';
+      startClock();
 
-    async function fetchAndDrawQR() {
       try {
-        const res = await fetch(SHEET_URL + `?t=${Math.random()}`);
+        const sheetAPI = `https://opensheet.elk.sh/${SHEET_ID}/token_qr`;
+        const res = await fetch(sheetAPI);
         const rows = await res.json();
-        const token = rows[0]?.A;
-        if (token) generateQR(token);
+
+        const keys = Object.keys(rows[0]);
+        const tokenKey = keys.find(k => k.toLowerCase().includes("token")); // fleksibel: "Token Aktif" atau "token"
+        const token = rows[0][tokenKey];
+
+        if (!token) {
+          document.getElementById('qr-image').alt = '❌ Token kosong atau tidak ditemukan';
+          return;
+        }
+
+        const qrUrl = `https://t.me/absen_TA_bot/Absen_TA?startapp=${token}`;
+        document.getElementById('qr-image').src = qrUrl;
       } catch (err) {
+        document.getElementById('qr-image').alt = '❌ QR gagal dimuat';
         console.error('Gagal ambil token:', err);
       }
     }
+
+    // AUTO LOGIN JIKA MASIH DI SESI YANG SAMA
+    window.onload = async () => {
+      if (sessionStorage.getItem('qr_login') === 'true') {
+        await showQR();
+      }
+    };
   </script>
 </body>
 </html>
