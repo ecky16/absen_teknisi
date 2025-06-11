@@ -128,32 +128,33 @@
       }
     }
 
-    async function showQR() {
-      document.getElementById('password-form').style.display = 'none';
-      document.getElementById('qr-section').style.display = 'flex';
-      startClock();
+  async function showQR() {
+  document.getElementById('password-form').style.display = 'none';
+  document.getElementById('qr-section').style.display = 'flex';
+  startClock();
 
-      try {
-        const sheetAPI = `https://opensheet.elk.sh/${SHEET_ID}/token_qr`;
-        const res = await fetch(sheetAPI);
-        const rows = await res.json();
+  try {
+    const sheetAPI = `https://opensheet.elk.sh/${SHEET_ID}/token_qr`;
+    const res = await fetch(sheetAPI);
+    const rows = await res.json();
 
-        const keys = Object.keys(rows[0]);
-        const tokenKey = keys.find(k => k.toLowerCase().includes("token")); // fleksibel: "Token Aktif" atau "token"
-        const token = rows[0][tokenKey];
+    const keys = Object.keys(rows[0]);
+    const tokenKey = keys.find(k => k.toLowerCase().includes("token"));
+    const token = rows[0][tokenKey];
 
-        if (!token) {
-          document.getElementById('qr-image').alt = '❌ Token kosong atau tidak ditemukan';
-          return;
-        }
-
-        const qrUrl = `https://t.me/absen_TA_bot/Absen_TA?startapp=${token}`;
-        document.getElementById('qr-image').src = qrUrl;
-      } catch (err) {
-        document.getElementById('qr-image').alt = '❌ QR gagal dimuat';
-        console.error('Gagal ambil token:', err);
-      }
+    if (!token) {
+      document.getElementById('qr-image').alt = '❌ Token kosong atau tidak ditemukan';
+      return;
     }
+
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://t.me/absen_TA_bot/Absen_TA?startapp=${token}`;
+    document.getElementById('qr-image').src = qrUrl;
+  } catch (err) {
+    document.getElementById('qr-image').alt = '❌ QR gagal dimuat';
+    console.error('Gagal ambil token:', err);
+  }
+}
+
 
     // AUTO LOGIN JIKA MASIH DI SESI YANG SAMA
     window.onload = async () => {
