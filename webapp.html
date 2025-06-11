@@ -2,44 +2,66 @@
 <html>
 <head>
   <meta charset="UTF-8" />
-  <title>Absen Teknisi</title>
-  <script>
-    async function absen() {
-      const tg = window.Telegram.WebApp;
-      const nama = tg.initDataUnsafe?.user?.first_name || "Tanpa Nama";
-      const id = tg.initDataUnsafe?.user?.id || "Unknown";
-
-      const urlParams = new URLSearchParams(window.location.search);
-      const token = urlParams.get("startapp");
-
-      const finalURL = `https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec?token=${token}&nama=${encodeURIComponent(nama)}&id=${id}`;
-
-      try {
-        const res = await fetch(finalURL);
-        const html = await res.text();
-        document.body.innerHTML = html;
-        tg.expand();
-      } catch (e) {
-        document.body.innerHTML = "<h2 style='color:white;text-align:center'>❌ Gagal absen</h2>";
-      }
-    }
-
-    window.onload = absen;
-  </script>
+  <title>Absen Berhasil</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <style>
     body {
       background-color: black;
       color: white;
-      font-family: sans-serif;
+      font-family: monospace;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
+      justify-content: center;
       height: 100vh;
       margin: 0;
+      text-align: center;
+    }
+    h1 {
+      color: lime;
+    }
+    .info {
+      margin-top: 10px;
+      font-size: 1.1rem;
     }
   </style>
 </head>
 <body>
-  <p>⏳ Memproses absen...</p>
+  <h1>✅ Absen Berhasil</h1>
+  <div class="info" id="nama">Memuat nama...</div>
+  <div class="info" id="waktu">Memuat waktu...</div>
+
+  <script>
+    Telegram.WebApp.ready();
+
+    const tg = Telegram.WebApp;
+    const user = tg.initDataUnsafe.user || {};
+    const token = tg.initDataUnsafe.start_param;
+    const nama = user.first_name || "Tanpa Nama";
+    const id = user.id || "Unknown";
+
+    // Tampilkan info nama + waktu
+    const now = new Date();
+    const hari = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+    const bulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+
+    const hariIni = `${hari[now.getDay()]}, ${now.getDate()} ${bulan[now.getMonth()]} ${now.getFullYear()}`;
+    const jamIni = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+
+    document.getElementById('nama').innerText = `👤 ${nama}`;
+    document.getElementById('waktu').innerText = `🗓️ ${hariIni}, ${jamIni}`;
+
+    // Kirim absen
+    const url = `https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec?token=${token}&nama=${encodeURIComponent(nama)}&id=${id}`;
+    fetch(url)
+      .then(() => {
+        // Auto close 5 detik (opsional)
+        setTimeout(() => tg.close(), 5000);
+      })
+      .catch(() => {
+        document.querySelector('h1').innerText = '❌ Gagal Absen';
+        document.getElementById('waktu').innerText = '';
+      });
+  </script>
 </body>
 </html>
