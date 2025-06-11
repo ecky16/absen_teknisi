@@ -10,6 +10,7 @@
 
   <script>
     const tg = window.Telegram.WebApp;
+    tg.ready();
     tg.expand();
 
     const user = tg.initDataUnsafe.user || {};
@@ -24,20 +25,24 @@
         token: token
       };
 
-      const res = await fetch("https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec", {
-        method: "POST",
-        body: JSON.stringify(payload),
-        headers: {
-          "Content-Type": "application/json"
-        }
-      });
+      try {
+        const res = await fetch("https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec", {
+          method: "POST",
+          body: JSON.stringify(payload),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        });
 
-      const text = await res.text();
-      if (text === "ok") {
-        alert("Absen berhasil!");
-        tg.close();
-      } else {
-        alert("Gagal absen: " + text);
+        const text = await res.text();
+        if (text === "ok") {
+          alert("Absen berhasil!");
+          tg.close();
+        } else {
+          alert("Gagal absen: " + text);
+        }
+      } catch (err) {
+        alert("Gagal kirim: " + err);
       }
     });
   </script>
