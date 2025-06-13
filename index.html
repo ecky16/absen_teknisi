@@ -1,58 +1,69 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>QR Absen Teknisi</title>
+  <title>QR Absensi Teknisi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      padding-top: 50px;
-    }
-    #qr {
-      margin-top: 20px;
-    }
-    #waktu {
-      font-size: 18px;
-      font-weight: bold;
-    }
+    body { font-family: sans-serif; text-align: center; padding: 20px; background: #f7f7f7; }
+    #qr-container { display: none; }
+    input[type="password"] { padding: 10px; font-size: 16px; }
+    .hidden { display: none; }
+    canvas { margin-top: 20px; }
+    h2, h3 { margin: 5px; }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 </head>
 <body>
-  <h2>📲 Scan QR Untuk Absen</h2>
-  <div id="waktu"></div>
-  <div id="qr">
-    <img id="qr-img" src="" alt="Loading QR Code..." />
+  <h2>Masukkan Password</h2>
+  <input type="password" id="password" placeholder="Password">
+  <button onclick="checkPassword()">Masuk</button>
+
+  <div id="qr-container">
+    <h2 id="tanggal"></h2>
+    <h3 id="jam"></h3>
+    <canvas id="qr"></canvas>
   </div>
 
   <script>
-    async function loadQR() {
-      const tokenUrl = "https://script.google.com/macros/s/AKfycbyTngIjAKyIKM3JvMmUF0iHXnspbyiTslbd3qnU_QQ13muocEl_431Wp-cdGd-qvZgO/exec?getToken=1";
-      try {
-        const res = await fetch(tokenUrl);
-        const token = await res.text();
-        const timestamp = Date.now();
-        const aliasToken = token + "-" + timestamp;
-        const qrData = "https://t.me/absen_TA_bot?start=" + aliasToken;
-        const qrURL = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" + encodeURIComponent(qrData);
-        document.getElementById("qr-img").src = qrURL;
-      } catch (e) {
-        document.getElementById("qr").innerHTML = "<p style='color:red;'>❌ Gagal memuat QR Code. Cek koneksi atau WebApp Script!</p>";
-        console.error("QR Load Error:", e);
+    const PASSWORD_BENAR = "sapblsatu";
+    const TOKEN_API_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec?action=getToken"; // Ganti dengan URL Apps Script kamu
+
+    function checkPassword() {
+      const input = document.getElementById("password").value;
+      if (input === PASSWORD_BENAR) {
+        document.querySelector("input").classList.add("hidden");
+        document.querySelector("button").classList.add("hidden");
+        document.getElementById("qr-container").style.display = "block";
+        showTime();
+        loadQR();
+        setInterval(() => {
+          showTime();
+          loadQR();
+        }, 15000); // Refresh tiap 15 detik
+      } else {
+        alert("Password salah cuy 😬");
       }
     }
 
-    function updateWaktu() {
+    function showTime() {
       const now = new Date();
-      const hari = now.toLocaleDateString('id-ID', { weekday: 'long' });
-      const tanggal = now.toLocaleDateString('id-ID');
-      const jam = now.toLocaleTimeString('id-ID');
-      document.getElementById("waktu").innerText = `${hari}, ${tanggal} — ${jam}`;
+      document.getElementById("tanggal").textContent = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      document.getElementById("jam").textContent = now.toLocaleTimeString('id-ID');
     }
 
-    setInterval(updateWaktu, 1000);
-    updateWaktu();
-    loadQR();
+    async function loadQR() {
+      try {
+        const res = await fetch(TOKEN_API_URL);
+        const data = await res.json();
+        const token = data.token;
+        const url = `https://t.me/absen_TA_bot?start=${token}`;
+        QRCode.toCanvas(document.getElementById('qr'), url, function (error) {
+          if (error) console.error(error);
+        });
+      } catch (err) {
+        console.error("Gagal ambil token!", err);
+      }
+    }
   </script>
 </body>
 </html>
