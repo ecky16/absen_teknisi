@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Scan QR untuk Absen</title>
+  <title>Absensi Teknisi</title>
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,49 +13,50 @@
       align-items: center;
       justify-content: center;
       height: 100vh;
+      background-color: #f3f3f3;
       padding: 20px;
       text-align: center;
     }
     canvas {
       margin-top: 20px;
     }
-    button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      font-size: 1rem;
+    #time {
+      font-size: 1.2em;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
   <h2>Scan QR untuk Absen</h2>
-  <canvas id="qr"></canvas>
-  <div id="link-area"></div>
+  <div id="qr"></div>
+  <div id="time"></div>
 
   <script>
-    const TOKEN_API_URL = "https://script.google.com/macros/s/AKfycbwSwwQz9oIF2ZJFib7pHFvWrwicgfoIv0pnRlx_QAuwCfXbU4rw1htSXvSmjI-f6oLn/exec?action=getToken";
+    const tokenURL = "https://script.google.com/macros/s/AKfycbwSwwQz9oIF2ZJFib7pHFvWrwicgfoIv0pnRlx_QAuwCfXbU4rw1htSXvSmjI-f6oLn/exec?action=getToken";
 
-    async function loadQR() {
+    async function updateQR() {
       try {
-        const res = await fetch(TOKEN_API_URL);
+        const res = await fetch(tokenURL);
         const data = await res.json();
         const token = data.token;
-
         const link = `https://t.me/absen_TA_bot?start=${token}`;
-        QRCode.toCanvas(document.getElementById('qr'), link);
 
-        document.getElementById('link-area').innerHTML = `
-          <p>Jika QR tidak otomatis membuka Telegram, klik tombol di bawah ini:</p>
-          <a href="${link}" target="_blank">
-            <button>Buka Telegram</button>
-          </a>
-        `;
+        document.getElementById('qr').innerHTML = "";
+        QRCode.toCanvas(document.getElementById('qr'), link);
       } catch (err) {
-        console.error("Gagal ambil token!", err);
-        document.getElementById('link-area').innerHTML = "<p style='color:red;'>Gagal mengambil token. Periksa koneksi internet.</p>";
+        document.getElementById('qr').innerHTML = "<p style='color:red;'>Gagal ambil token.</p>";
       }
     }
 
-    loadQR();
+    function updateTime() {
+      const now = new Date();
+      document.getElementById('time').innerText = now.toLocaleString();
+    }
+
+    updateQR();
+    updateTime();
+    setInterval(updateQR, 10000); // update QR setiap 10 detik
+    setInterval(updateTime, 1000); // update jam setiap detik
   </script>
 </body>
 </html>
