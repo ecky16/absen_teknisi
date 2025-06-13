@@ -3,6 +3,8 @@
 <head>
   <title>Scan QR untuk Absen</title>
   <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: sans-serif;
@@ -11,15 +13,23 @@
       align-items: center;
       justify-content: center;
       height: 100vh;
+      padding: 20px;
+      text-align: center;
     }
     canvas {
       margin-top: 20px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1rem;
     }
   </style>
 </head>
 <body>
   <h2>Scan QR untuk Absen</h2>
   <canvas id="qr"></canvas>
+  <div id="link-area"></div>
 
   <script>
     const TOKEN_API_URL = "https://script.google.com/macros/s/AKfycbwSwwQz9oIF2ZJFib7pHFvWrwicgfoIv0pnRlx_QAuwCfXbU4rw1htSXvSmjI-f6oLn/exec?action=getToken";
@@ -30,10 +40,18 @@
         const data = await res.json();
         const token = data.token;
 
-        const telegramDeepLink = `tg://resolve?domain=absen_TA_bot&start=${token}`;
-        QRCode.toCanvas(document.getElementById('qr'), telegramDeepLink);
+        const link = `https://t.me/absen_TA_bot?start=${token}`;
+        QRCode.toCanvas(document.getElementById('qr'), link);
+
+        document.getElementById('link-area').innerHTML = `
+          <p>Jika QR tidak otomatis membuka Telegram, klik tombol di bawah ini:</p>
+          <a href="${link}" target="_blank">
+            <button>Buka Telegram</button>
+          </a>
+        `;
       } catch (err) {
         console.error("Gagal ambil token!", err);
+        document.getElementById('link-area').innerHTML = "<p style='color:red;'>Gagal mengambil token. Periksa koneksi internet.</p>";
       }
     }
 
