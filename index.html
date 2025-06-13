@@ -1,69 +1,101 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>QR Absensi Teknisi</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body { font-family: sans-serif; text-align: center; padding: 20px; background: #f7f7f7; }
-    #qr-container { display: none; }
-    input[type="password"] { padding: 10px; font-size: 16px; }
-    .hidden { display: none; }
-    canvas { margin-top: 20px; }
-    h2, h3 { margin: 5px; }
-  </style>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-</head>
-<body>
-  <h2>Masukkan Password</h2>
-  <input type="password" id="password" placeholder="Password">
-  <button onclick="checkPassword()">Masuk</button>
+const TELEGRAM_TOKEN = "7317468240:AAH-5x3o0zY6n_vnXzhjAq1ZFrW4Qy_Bz-Y";
+const SPREADSHEET_ID = "1wqYmtZ_PS8Ao-gpCBjqdSi1MmzotBmZa1BeALFmUuu4";
 
-  <div id="qr-container">
-    <h2 id="tanggal"></h2>
-    <h3 id="jam"></h3>
-    <canvas id="qr"></canvas>
-  </div>
+function doGet(e) {
+  const action = e.parameter.action;
+  if (action === 'getToken') return getToken();
+  return ContentService.createTextOutput("Invalid request");
+}
 
-  <script>
-    const PASSWORD_BENAR = "sapblsatu";
-    const TOKEN_API_URL = "https://script.google.com/macros/s/AKfycbwSwwQz9oIF2ZJFib7pHFvWrwicgfoIv0pnRlx_QAuwCfXbU4rw1htSXvSmjI-f6oLn/exec?action=getToken"; // Ganti dengan URL Apps Script kamu
+function getToken() {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const sheet = ss.getSheetByName('token_qr');
+  let token = sheet.getRange('A2').getValue();
 
-    function checkPassword() {
-      const input = document.getElementById("password").value;
-      if (input === PASSWORD_BENAR) {
-        document.querySelector("input").classList.add("hidden");
-        document.querySelector("button").classList.add("hidden");
-        document.getElementById("qr-container").style.display = "block";
-        showTime();
-        loadQR();
-        setInterval(() => {
-          showTime();
-          loadQR();
-        }, 15000); // Refresh tiap 15 detik
+  if (!token) {
+    token = generateToken(8);
+    sheet.getRange('A2').setValue(token);
+    sheet.getRange('B2').setValue(new Date());
+  }
+
+  return ContentService
+    .createTextOutput(JSON.stringify({ token }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  try {
+    const contents = JSON.parse(e.postData.contents);
+    const msg = contents.message;
+
+    if (!msg || !msg.text) return ContentService.createTextOutput("OK");
+
+    const chat_id = msg.chat.id;
+    const text = msg.text;
+    const full_name = msg.from.first_name + " " + (msg.from.last_name || "");
+    const telegram_id = msg.from.id;
+
+    if (text.startsWith("/start")) {
+      const token_user = text.replace("/start", "").trim();
+
+      const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+      const sheet_token = ss.getSheetByName("token_qr");
+      const current_token = sheet_token.getRange("A2").getValue().toString().trim();
+
+      Logger.log("TOKEN USER: '" + token_user + "'");
+      Logger.log("TOKEN SHEET: '" + current_token + "'");
+
+      if (!token_user) {
+        sendTelegram(chat_id, `⚠️ Kamu belum scan QR. Silakan scan QR dulu dari layar TV.`);
+        return ContentService.createTextOutput("OK");
+      }
+
+      if (token_user === current_token) {
+        const sheet_log = ss.getSheetByName("log_absen");
+        const timestamp = new Date();
+        sheet_log.appendRow([timestamp, full_name, telegram_id, token_user]);
+
+        const token_baru = generateToken(8);
+        sheet_token.getRange("A2").setValue(token_baru);
+        sheet_token.getRange("B2").setValue(timestamp);
+
+        sendTelegram(chat_id, `✅ Selamat pagi saya ${full_name}, dengan token *${token_user}*, mulai absen.`, "Markdown");
       } else {
-        alert("Password salah cuy 😬");
+        sendTelegram(chat_id, `❌ Token tidak valid atau sudah kadaluarsa. Silakan scan QR terbaru.`);
       }
     }
+  } catch (err) {
+    Logger.log("Error di doPost: " + err);
+  }
 
-    function showTime() {
-      const now = new Date();
-      document.getElementById("tanggal").textContent = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-      document.getElementById("jam").textContent = now.toLocaleTimeString('id-ID');
-    }
+  return ContentService.createTextOutput("OK");
+}
 
-    async function loadQR() {
-      try {
-        const res = await fetch(TOKEN_API_URL);
-        const data = await res.json();
-        const token = data.token;
-        const url = `https://t.me/absen_TA_bot?start=${token}`;
-        QRCode.toCanvas(document.getElementById('qr'), url, function (error) {
-          if (error) console.error(error);
-        });
-      } catch (err) {
-        console.error("Gagal ambil token!", err);
-      }
-    }
-  </script>
-</body>
-</html>
+function sendTelegram(chat_id, message, parse_mode = "Markdown") {
+  if (!message || message.trim() === "") {
+    Logger.log("❌ Gagal kirim: message kosong.");
+    return;
+  }
+
+  const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
+  const payload = {
+    method: "post",
+    contentType: "application/json",
+    payload: JSON.stringify({
+      chat_id: chat_id,
+      text: message,
+      parse_mode: parse_mode
+    })
+  };
+
+  UrlFetchApp.fetch(url, payload);
+}
+
+function generateToken(length) {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
