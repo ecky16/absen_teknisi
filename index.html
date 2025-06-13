@@ -41,8 +41,12 @@
         const token = data.token;
         const link = `https://t.me/absen_TA_bot?start=${token}`;
 
-        document.getElementById('qr').innerHTML = "";
-        QRCode.toCanvas(document.getElementById('qr'), link);
+       const qrDiv = document.getElementById('qr');
+qrDiv.innerHTML = "";
+const canvas = document.createElement("canvas");
+qrDiv.appendChild(canvas);
+QRCode.toCanvas(canvas, link);
+
       } catch (err) {
         document.getElementById('qr').innerHTML = "<p style='color:red;'>Gagal ambil token.</p>";
       }
