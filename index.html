@@ -1,66 +1,40 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Absensi Teknisi</title>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      background-color: #f3f3f3;
-      padding: 20px;
-      text-align: center;
-    }
-    canvas {
-      margin-top: 20px;
-    }
-    #time {
-      font-size: 1.2em;
-      margin-top: 10px;
-    }
-  </style>
-</head>
-<body>
-  <h2>Scan QR untuk Absen</h2>
-  <div id="qr"></div>
-  <div id="time"></div>
+  <head>
+    <title>QR Absensi Teknisi</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      body { font-family: sans-serif; text-align: center; padding: 20px; }
+      #qrcode canvas { width: 300px !important; height: 300px !important; }
+      #jam { font-size: 24px; margin-top: 20px; }
+    </style>
+  </head>
+  <body>
+    <h2>Scan untuk Absen</h2>
+    <div id="qrcode"></div>
+    <div id="jam"></div>
 
-  <script>
-    const tokenURL = "https://script.google.com/macros/s/AKfycbzPPoM3ZvoFYTVVuZIDjO_Xi6PdJ1yHb5VI0jZmBG39nKwptfwj5GBtzeDGPy324on2/exec?action=getToken";
+    <script>
+      const botStartLink = "https://t.me/absen_TA_bot?start=webapp_absen";
+      const qrDiv = document.getElementById("qrcode");
 
-    async function updateQR() {
-  try {
-    const res = await fetch(tokenURL);
-    const data = await res.json();
-    const token = data.token;
-    const link = `https://t.me/absen_TA_bot?start=${token}`;
+      function generateQR() {
+        qrDiv.innerHTML = "";
+        QRCode.toCanvas(document.createElement("canvas"), botStartLink, function (err, canvas) {
+          if (!err) qrDiv.appendChild(canvas);
+        });
+      }
 
-    const qrDiv = document.getElementById('qr');
-    qrDiv.innerHTML = "";
-    const canvas = document.createElement("canvas");
-    qrDiv.appendChild(canvas);
-    QRCode.toCanvas(canvas, link);
-  } catch (err) {
-    document.getElementById('qr').innerHTML = "<p style='color:red;'>Gagal ambil token.</p>";
-  }
-}
+      function updateTime() {
+        const now = new Date();
+        document.getElementById("jam").innerText =
+          now.toLocaleDateString("id-ID") + " " + now.toLocaleTimeString("id-ID");
+      }
 
-
-    function updateTime() {
-      const now = new Date();
-      document.getElementById('time').innerText = now.toLocaleString();
-    }
-
-    updateQR();
-    updateTime();
-    setInterval(updateQR, 10000); // update QR setiap 10 detik
-    setInterval(updateTime, 1000); // update jam setiap detik
-  </script>
-</body>
+      generateQR();
+      updateTime();
+      setInterval(updateTime, 1000); // jam real-time
+    </script>
+  </body>
 </html>
