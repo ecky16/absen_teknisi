@@ -35,22 +35,22 @@
     const tokenURL = "https://script.google.com/macros/s/AKfycbzPPoM3ZvoFYTVVuZIDjO_Xi6PdJ1yHb5VI0jZmBG39nKwptfwj5GBtzeDGPy324on2/exec?action=getToken";
 
     async function updateQR() {
-      try {
-        const res = await fetch(tokenURL);
-        const data = await res.json();
-        const token = data.token;
-        const link = `https://t.me/absen_TA_bot?start=${token}`;
+  try {
+    const res = await fetch(tokenURL);
+    const data = await res.json();
+    const token = data.token;
+    const link = `https://t.me/absen_TA_bot?start=${token}`;
 
-       const qrDiv = document.getElementById('qr');
-qrDiv.innerHTML = "";
-const canvas = document.createElement("canvas");
-qrDiv.appendChild(canvas);
-QRCode.toCanvas(canvas, link);
+    const qrDiv = document.getElementById('qr');
+    qrDiv.innerHTML = "";
+    const canvas = document.createElement("canvas");
+    qrDiv.appendChild(canvas);
+    QRCode.toCanvas(canvas, link);
+  } catch (err) {
+    document.getElementById('qr').innerHTML = "<p style='color:red;'>Gagal ambil token.</p>";
+  }
+}
 
-      } catch (err) {
-        document.getElementById('qr').innerHTML = "<p style='color:red;'>Gagal ambil token.</p>";
-      }
-    }
 
     function updateTime() {
       const now = new Date();
