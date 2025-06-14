@@ -5,10 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>QR Absen Teknisi</title>
   <script>
-    const password = prompt("Masukkan password untuk menampilkan QR:");
-    if (password !== "haha") {
-      document.body.innerHTML = "<h2 style='color: red; text-align: center;'>❌ Akses ditolak. Password salah.</h2>";
-      throw new Error("Password salah");
+    if (!sessionStorage.getItem("akses_izin")) {
+      const pass = prompt("Masukkan password untuk menampilkan QR:");
+      if (pass !== "haha") {
+        document.write("<h2 style='color: red; text-align: center;'>❌ Akses ditolak. Password salah.</h2>");
+        throw new Error("Password salah");
+      } else {
+        sessionStorage.setItem("akses_izin", "yes");
+      }
     }
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
@@ -65,8 +69,8 @@
         });
     }
 
-    setInterval(fetchToken, 5000); // 5 detik
-    setInterval(updateTime, 1000); // update jam tiap detik
+    setInterval(fetchToken, 5000); // update token tiap 5 detik
+    setInterval(updateTime, 1000); // update waktu tiap detik
     fetchToken();
     updateTime();
   </script>
