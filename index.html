@@ -1,0 +1,68 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>QR Absen Teknisi</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background-color: #111;
+      color: #fff;
+      padding: 20px;
+    }
+    #qrcode {
+      margin: 20px auto;
+    }
+    #waktu {
+      font-size: 1.5em;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>📸 Scan untuk Absen</h1>
+  <div id="qrcode"><canvas id="qr"></canvas></div>
+  <div id="tokenText"></div>
+  <div id="waktu"></div>
+
+  <script>
+    const qr = new QRious({
+      element: document.getElementById('qr'),
+      size: 256,
+      value: 'Memuat...'
+    });
+
+    function updateTime() {
+      const now = new Date();
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      const tanggal = now.toLocaleDateString('id-ID', options);
+      const jam = now.toLocaleTimeString('id-ID');
+      document.getElementById('waktu').textContent = tanggal + " - " + jam;
+    }
+
+    function fetchToken() {
+      fetch("https://script.google.com/macros/s/AKfycbzjYLOPjkm8GvbxCgLFbysK16n1nh6YRTgmKFn7oQTGfNSS9t85JkXwfoAXEHkHbEvVXg/exec?action=getToken")
+        .then(res => res.json())
+        .then(data => {
+          const token = data.token;
+          const url = `https://t.me/absen_TA_bot?start=${token}`;
+          qr.value = url;
+          document.getElementById('tokenText').textContent = `Token: ${token}`;
+        })
+        .catch(err => {
+          qr.value = 'Gagal ambil token';
+          document.getElementById('tokenText').textContent = '🔴 Gagal mengambil token!';
+        });
+    }
+
+    setInterval(fetchToken, 5000); // 5 detik
+    setInterval(updateTime, 1000); // update jam tiap detik
+    fetchToken();
+    updateTime();
+  </script>
+</body>
+</html>
