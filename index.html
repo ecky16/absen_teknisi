@@ -44,7 +44,7 @@
     }
 
     function fetchToken() {
-      fetch("https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec?action=getToken")
+      fetch("https://script.google.com/macros/s/AKfycbzjYLOPjkm8GvbxCgLFbysK16n1nh6YRTgmKFn7oQTGfNSS9t85JkXwfoAXEHkHbEvVXg/exec?action=getToken")
         .then(res => res.json())
         .then(data => {
           const token = data.token;
