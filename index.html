@@ -49,7 +49,7 @@
         .then(res => res.json())
         .then(data => {
           const token = data.token;
-          const url = `https://t.me/absensi_qr_bot?start=webapp_absen`;
+          const url = `https://t.me/absensi_qr_bot?start=${token}`;
           qr.value = url;
           document.getElementById('tokenText').textContent = `Token: ${token}`;
         })
