@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Login QR Absen</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; background-color: #111; color: #fff; padding-top: 50px; }
+    button {
+      font-size: 1.2em; padding: 10px 20px; margin: 10px;
+      background-color: #0a84ff; border: none; border-radius: 8px; color: white;
+      cursor: pointer;
+    }
+    button:hover { background-color: #005fcc; }
+  </style>
+</head>
+<body>
+  <h1>🔐 Akses QR Absen Teknisi</h1>
+  <p>Silakan masukkan password:</p>
+  <input type="password" id="pass" placeholder="Password..." style="font-size:1em; padding:8px;" />
+  <br><br>
+  <button onclick="cekPassword()">Masuk</button>
+
+  <div id="menuArea" style="display:none;">
+    <h2>Pilih Area:</h2>
+    <button onclick="masuk('psn.html')">📍 Area PSN</button>
+    <button onclick="masuk('pbl.html')">📍 Area PBL</button>
+    <button onclick="masuk('lmj.html')">📍 Area LMJ</button>
+  </div>
+
+  <script>
+    function cekPassword() {
+      const pw = document.getElementById("pass").value;
+      if (pw === "haha") {
+        document.getElementById("menuArea").style.display = "block";
+      } else {
+        alert("❌ Password salah!");
+      }
+    }
+    function masuk(file) {
+      window.location.href = file;
+    }
+  </script>
+</body>
+</html>
