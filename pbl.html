@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>QR Absen PBL</title>
+  <script>
+    if (!sessionStorage.getItem("akses_izin")) {
+      const pass = prompt("Masukkan password untuk menampilkan QR:");
+      if (pass !== "haha") {
+        document.write("<h2 style='color: red; text-align: center;'>❌ Akses ditolak. Password salah.</h2>");
+        throw new Error("Password salah");
+      } else {
+        sessionStorage.setItem("akses_izin", "yes");
+      }
+    }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <style>
+    body { font-family: sans-serif; text-align: center; background-color: #111; color: #fff; padding: 20px; }
+    #qrcode { margin: 20px auto; }
+    #waktu { font-size: 1.5em; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>📸 QR Absen Area PBL</h1>
+  <div id="qrcode"><canvas id="qr"></canvas></div>
+  <div id="waktu"></div>
+
+  <script>
+    const qr = new QRious({ element: document.getElementById('qr'), size: 256, value: 'Memuat...' });
+
+    function updateTime() {
+      const now = new Date();
+      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      const tanggal = now.toLocaleDateString('id-ID', options);
+      const jam = now.toLocaleTimeString('id-ID');
+      document.getElementById('waktu').textContent = tanggal + " - " + jam;
+    }
+
+    async function fetchToken() {
+      try {
+        const res = await fetch('https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec?action=getToken&area=PBL');
+        const data = await res.json();
+        const token = data.token;
+        const url = `https://t.me/absensi_qr_bot/WebApp?start=${token}_PBL`;
+        qr.value = url;
+      } catch (e) {
+        qr.value = 'Gagal ambil token';
+      }
+    }
+
+    setInterval(fetchToken, 5000);
+    setInterval(updateTime, 1000);
+    fetchToken();
+    updateTime();
+  </script>
+</body>
+</html>
