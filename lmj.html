@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <title>QR Absen LMJ</title>
-  <script>
-    if (!sessionStorage.getItem("akses_izin")) {
-      const pass = prompt("Masukkan password untuk menampilkan QR:");
-      if (pass !== "haha") {
-  document.body.innerHTML = "<h2 style='color: red; text-align: center; margin-top: 50px;'>❌ Akses ditolak. Password salah.</h2>";
-  throw new Error("Password salah");
-}
-
-      } else {
-        sessionStorage.setItem("akses_izin", "yes");
-      }
+<script>
+  const akses = sessionStorage.getItem("akses_izin");
+  if (!akses) {
+    const pass = prompt("Masukkan password untuk menampilkan QR:");
+    if (pass !== "haha") {
+      document.body.innerHTML = "<h2 style='color: red; text-align: center; margin-top: 50px;'>❌ Akses ditolak. Password salah.</h2>";
+      throw new Error("Password salah");
+    } else {
+      sessionStorage.setItem("akses_izin", "yes");
     }
-  </script>
+  }
+</script>
+
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
   <style>
     body { font-family: sans-serif; text-align: center; background-color: #111; color: #fff; padding: 20px; }
