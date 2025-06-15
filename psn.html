@@ -45,7 +45,7 @@
         try {
           const data = JSON.parse(text);
           const token = data.token;
-          const url = `https://t.me/absensi_qr_bot/WebApp?start=${token}_PSN`;
+          const url = `https://t.me/absensi_qr_bot?start=${token}_PSN`;
           qr.value = url;
         } catch (jsonErr) {
           qr.value = '❌ Format token tidak valid: ' + text;
