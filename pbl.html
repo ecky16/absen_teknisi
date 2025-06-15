@@ -6,9 +6,11 @@
   <script>
     if (!sessionStorage.getItem("akses_izin")) {
       const pass = prompt("Masukkan password untuk menampilkan QR:");
-      if (pass !== "haha") {
-        document.write("<h2 style='color: red; text-align: center;'>❌ Akses ditolak. Password salah.</h2>");
-        throw new Error("Password salah");
+     if (pass !== "haha") {
+  document.body.innerHTML = "<h2 style='color: red; text-align: center; margin-top: 50px;'>❌ Akses ditolak. Password salah.</h2>";
+  throw new Error("Password salah");
+}
+
       } else {
         sessionStorage.setItem("akses_izin", "yes");
       }
