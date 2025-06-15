@@ -39,7 +39,7 @@
 
     async function fetchToken() {
       try {
-        const res = await fetch('https://script.google.com/macros/s/7188230570:AAFM7KY1ra62awZbhH35f4PgaRqZEiuAOg4/exec?action=getToken&area=PSN');
+        const res = await fetch('https://script.google.com/macros/s/AKfycbzjYLOPjkm8GvbxCgLFbysK16n1nh6YRTgmKFn7oQTGfNSS9t85JkXwfoAXEHkHbEvVXg/exec?action=getToken&area=PSN');
         const data = await res.json();
         const token = data.token;
         const url = `https://t.me/absensi_qr_bot/WebApp?start=${token}_PSN`;
