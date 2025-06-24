@@ -36,8 +36,15 @@
         alert("❌ Password salah!");
       }
     }
+
     function masuk(file) {
-      window.location.href = file + "?auth=haha";
+      // Buat link dengan parameter auth
+      const link = file + "?auth=haha";
+      // Bikin <a> sementara lalu klik otomatis, agar bisa gunakan replaceState nanti
+      const a = document.createElement("a");
+      a.href = link;
+      document.body.appendChild(a);
+      a.click();
     }
   </script>
 </body>
