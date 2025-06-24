@@ -19,6 +19,9 @@
   if (auth !== "haha") {
     alert("🔒 Akses ditolak. Silakan login dahulu.");
     window.location.href = "login.html";
+  } else {
+    // Hapus parameter auth dari address bar
+    window.history.replaceState({}, document.title, window.location.pathname);
   }
 </script>
 
