@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>QR Absen PSN</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+  <style>
+    body { font-family: sans-serif; text-align: center; background-color: #111; color: #fff; padding: 20px; }
+    #qrcode { margin: 20px auto; }
+    #waktu { font-size: 1.5em; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const auth = urlParams.get("auth");
+  if (auth !== "haha") {
+    alert("🔒 Akses ditolak. Silakan login dahulu.");
+    window.location.href = "login.html";
+  }
+</script>
+
+  <h1>📸 QR Absen Area PSN</h1>
+  <div id="qrcode"><canvas id="qr"></canvas></div>
+  <div id="waktu"></div>
+  <div id="tokenDisplay" style="margin-top:10px; font-size:1.2em; color:#0f0;"></div>
+
+  <script>
+    let lastTimestamp = "";
+
+    async function fetchToken() {
+      try {
+        const res = await fetch('https://script.google.com/macros/s/AKfycbzjYLOPjkm8GvbxCgLFbysK16n1nh6YRTgmKFn7oQTGfNSS9t85JkXwfoAXEHkHbEvVXg/exec?action=getToken&area=PSN');
+        const data = await res.json();
+        if (data.timestamp !== lastTimestamp) {
+          lastTimestamp = data.timestamp;
+          const token = data.token;
+          const url = `https://t.me/absensi_qr_bot?start=${token}_PSN`;
+          qr.value = url;
+          document.getElementById('tokenDisplay').textContent = "Token Saat Ini: " + token;
+        }
+      } catch (e) {
+        qr.value = '❌ Gagal ambil token';
+        document.getElementById('tokenDisplay').textContent = "Token Error";
+      }
+    }
+    
+    setInterval(fetchToken, 10000);
+    updateTime();
+    fetchToken();
