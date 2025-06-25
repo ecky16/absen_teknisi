@@ -2,63 +2,101 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Login QR Absen</title>
   <style>
     body {
-      font-family: sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       background-color: #111;
       color: #fff;
       text-align: center;
-      padding: 50px;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background-color: #b40000;
+      padding: 20px;
+    }
+header img {
+  width: 220px;
+}
+    header h1 {
+      margin: 10px 0 0 0;
+      font-size: 1.5em;
+    }
+    .container {
+      padding: 40px 20px;
+    }
+    input[type="password"] {
+      font-size: 1.2em;
+      padding: 10px;
+      width: 80%;
+      max-width: 300px;
+      margin: 20px 0;
+      border: none;
+      border-radius: 5px;
+      text-align: center;
     }
     .btn {
       display: block;
       width: 80%;
       max-width: 300px;
-      margin: 15px auto;
+      margin: 10px auto;
       padding: 15px;
-      font-size: 1.2em;
-      background-color: #333;
-      color: #0f0;
-      border: 2px solid #0f0;
-      border-radius: 10px;
+      font-size: 1.1em;
+      background-color: #b40000;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
       cursor: pointer;
-      transition: background-color 0.3s;
+      transition: background-color 0.3s ease;
     }
     .btn:hover {
-      background-color: #0f0;
-      color: #111;
+      background-color: #ff1c1c;
     }
-    input {
-      font-size: 1.2em;
-      padding: 10px;
-      margin-bottom: 30px;
-      width: 80%;
-      max-width: 300px;
+    .area-selection {
+      display: none;
     }
   </style>
 </head>
 <body>
-  <h1>🛡️ Login QR Absen</h1>
-  <p>Masukkan password untuk akses QR:</p>
 
-  <input type="password" id="pass" placeholder="Masukkan password...">
+<header>
+  <img src="logo_telkom_akses.png" alt="Logo Telkom Akses" />
+  <h1>SISTEM ABSENSI PAKAI - QR</h1>
+</header>
 
-  <button class="btn" onclick="go('psn.html')">📍 Pasuruan</button>
-  <button class="btn" onclick="go('pbl.html')">📍 Probolinggo</button>
-  <button class="btn" onclick="go('lmj.html')">📍 Lumajang</button>
-  <button class="btn" onclick="go('krz.html')">📍 Kraksaan</button>
+<div class="container">
+  <div id="login-form">
+    <p>Masukkan password untuk mengakses halaman QR:</p>
+    <input type="password" id="pass" placeholder="Password..." />
+    <button class="btn" onclick="cekPassword()">🔓 Masuk</button>
+  </div>
 
-  <script>
-    function go(area) {
-      const pass = document.getElementById('pass').value;
-      if (pass === "haha") {
-        window.location.href = area + "?auth=haha";
-      } else {
-        alert("❌ Password salah. Silakan coba lagi.");
-      }
+  <div id="area-selection" class="area-selection">
+    <p>Pilih area untuk menampilkan QR:</p>
+    <button class="btn" onclick="go('psn.html')">📍 Pasuruan</button>
+    <button class="btn" onclick="go('pbl.html')">📍 Probolinggo</button>
+    <button class="btn" onclick="go('lmj.html')">📍 Lumajang</button>
+    <button class="btn" onclick="go('krz.html')">📍 Kraksaan</button>
+  </div>
+</div>
+
+<script>
+  function cekPassword() {
+    const pass = document.getElementById("pass").value;
+    if (pass === "haha") {
+      document.getElementById("login-form").style.display = "none";
+      document.getElementById("area-selection").style.display = "block";
+    } else {
+      alert("❌ Password salah. Silakan coba lagi.");
     }
-  </script>
+  }
+
+  function go(area) {
+    window.location.href = area + "?auth=haha";
+  }
+</script>
+
 </body>
 </html>
