@@ -30,11 +30,20 @@
       background-color: #0f0;
       color: #111;
     }
+    input {
+      font-size: 1.2em;
+      padding: 10px;
+      margin-bottom: 30px;
+      width: 80%;
+      max-width: 300px;
+    }
   </style>
 </head>
 <body>
   <h1>🛡️ Login QR Absen</h1>
-  <p>Pilih Area yang ingin ditampilkan:</p>
+  <p>Masukkan password untuk akses QR:</p>
+
+  <input type="password" id="pass" placeholder="Masukkan password...">
 
   <button class="btn" onclick="go('psn.html')">📍 Pasuruan</button>
   <button class="btn" onclick="go('pbl.html')">📍 Probolinggo</button>
@@ -43,7 +52,12 @@
 
   <script>
     function go(area) {
-      window.location.href = area + "?auth=haha";
+      const pass = document.getElementById('pass').value;
+      if (pass === "haha") {
+        window.location.href = area + "?auth=haha";
+      } else {
+        alert("❌ Password salah. Silakan coba lagi.");
+      }
     }
   </script>
 </body>
