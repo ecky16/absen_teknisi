@@ -70,7 +70,7 @@ header img {
 <div class="container">
   <div id="login-form">
     <p>Masukkan password untuk mengakses halaman QR:</p>
-    <input type="password" id="pass" placeholder="Password..." />
+    <input type="password" id="pass" placeholder="Password..." onkeydown="if (event.key === 'Enter') cekPassword()" />
     <button class="btn" onclick="cekPassword()">🔓 Masuk</button>
   </div>
 
