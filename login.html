@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -17,9 +16,9 @@
       background-color: #b40000;
       padding: 20px;
     }
-header img {
-  width: 220px;
-}
+    header img {
+      width: 220px;
+    }
     header h1 {
       margin: 10px 0 0 0;
       font-size: 1.5em;
@@ -64,18 +63,17 @@ header img {
 <header>
   <img src="logo_telkom_akses.png" alt="Logo Telkom Akses" />
   <h1>SAPA - QR </h1>
-<h2>SISTEM ABSENSI PAKAI QR</h2>
+  <h2>SISTEM ABSENSI PAKAI QR</h2>
 </header>
 
 <div class="container">
   <div id="login-form">
-  <form onsubmit="cekPassword(); return false;">
-    <p>Masukkan password untuk mengakses halaman QR:</p>
-    <input type="password" id="pass" placeholder="Password..." />
-    <button type="submit" class="btn">🔓 Masuk</button>
-  </form>
-</div>
-
+    <form onsubmit="cekPassword(); return false;">
+      <p>Masukkan password untuk mengakses halaman QR:</p>
+      <input type="password" id="pass" placeholder="Password..." />
+      <button type="submit" class="btn">🔓 Masuk</button>
+    </form>
+  </div>
 
   <div id="area-selection" class="area-selection">
     <p>Pilih area untuk menampilkan QR:</p>
@@ -90,6 +88,7 @@ header img {
   function cekPassword() {
     const pass = document.getElementById("pass").value;
     if (pass === "7qvt6") {
+      sessionStorage.setItem("loginQR", "true");
       document.getElementById("login-form").style.display = "none";
       document.getElementById("area-selection").style.display = "block";
     } else {
@@ -100,6 +99,13 @@ header img {
   function go(area) {
     window.location.href = area + "?auth=7qvt6";
   }
+
+  window.onload = function() {
+    if (sessionStorage.getItem("loginQR") === "true") {
+      document.getElementById("login-form").style.display = "none";
+      document.getElementById("area-selection").style.display = "block";
+    }
+  };
 </script>
 
 </body>
