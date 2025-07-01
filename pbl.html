@@ -12,55 +12,52 @@
 </head>
 <body>
 
+<!-- ✅ Cek login session -->
 <script>
-  const urlParams = new URLSearchParams(window.location.search);
-  const auth = urlParams.get("auth");
-  if (auth !== "7qvt6") {
-    alert("🔒 Akses ditolak. Silakan login dahulu.");
+  if (sessionStorage.getItem("loginQR") !== "true") {
     window.location.href = "login.html";
-  } else {
-    window.history.replaceState({}, document.title, window.location.pathname);
   }
 </script>
 
-  <h1>📸 QR Absen Area PBL</h1>
-  <div id="qrcode"><canvas id="qr"></canvas></div>
-  <div id="waktu"></div>
-  <div id="tokenDisplay" style="margin-top:10px; font-size:1.2em; color:#0f0;"></div>
+<h1>📸 QR Absen Area PBL</h1>
+<div id="qrcode"><canvas id="qr"></canvas></div>
+<div id="waktu"></div>
+<div id="tokenDisplay" style="margin-top:10px; font-size:1.2em; color:#0f0;"></div>
 
-  <script>
-    const qr = new QRious({ element: document.getElementById('qr'), size: 256, value: 'Memuat...' });
-    let lastTimestamp = "";
+<script>
+  const qr = new QRious({ element: document.getElementById('qr'), size: 256, value: 'Memuat...' });
+  let lastTimestamp = "";
 
-    async function fetchToken() {
-      try {
-        const res = await fetch('https://script.google.com/macros/s/AKfycbXXXXX/exec?action=getToken&area=PBL');
-        const data = await res.json();
-        if (data.timestamp !== lastTimestamp) {
-          lastTimestamp = data.timestamp;
-          const token = data.token;
-          const qrValue = `https://t.me/absensi_qr_bot?start=${token}_PBL`;
-          qr.value = qrValue;
-          document.getElementById('tokenDisplay').textContent = "Token Saat Ini: " + token;
-        }
-      } catch (e) {
-        qr.value = '❌ Gagal ambil token';
-        document.getElementById('tokenDisplay').textContent = "Token Error";
+  async function fetchToken() {
+    try {
+      const res = await fetch('https://script.google.com/macros/s/AKfycbzjYLOPjkm8GvbxCgLFbysK16n1nh6YRTgmKFn7oQTGfNSS9t85JkXwfoAXEHkHbEvVXg/exec?action=getToken&area=PBL');
+      const data = await res.json();
+      if (data.timestamp !== lastTimestamp) {
+        lastTimestamp = data.timestamp;
+        const token = data.token;
+        const qrValue = `https://t.me/absensi_qr_bot?start=${token}_PBL`;
+        qr.value = qrValue;
+        document.getElementById('tokenDisplay').textContent = "Token Saat Ini: " + token;
       }
+    } catch (e) {
+      qr.value = '❌ Gagal ambil token';
+      document.getElementById('tokenDisplay').textContent = "Token Error";
     }
+  }
 
-    function updateTime() {
-      const now = new Date();
-      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-      const tanggal = now.toLocaleDateString('id-ID', options);
-      const jam = now.toLocaleTimeString('id-ID');
-      document.getElementById('waktu').textContent = tanggal + " - " + jam;
-    }
+  function updateTime() {
+    const now = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const tanggal = now.toLocaleDateString('id-ID', options);
+    const jam = now.toLocaleTimeString('id-ID');
+    document.getElementById('waktu').textContent = tanggal + " - " + jam;
+  }
 
-    setInterval(fetchToken, 10000);
-    setInterval(updateTime, 1000);
-    fetchToken();
-    updateTime();
-  </script>
+  setInterval(fetchToken, 10000);
+  setInterval(updateTime, 1000);
+  fetchToken();
+  updateTime();
+</script>
+
 </body>
 </html>
