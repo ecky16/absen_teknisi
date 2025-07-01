@@ -34,12 +34,12 @@
 
     async function fetchToken() {
       try {
-        const res = await fetch('https://script.google.com/macros/s/AKfycbzjYLOPjkm8GvbxCgLFbysK16n1nh6YRTgmKFn7oQTGfNSS9t85JkXwfoAXEHkHbEvVXg/exec?action=getToken&area=PBL');
+        const res = await fetch('https://script.google.com/macros/s/AKfycbXXXXX/exec?action=getToken&area=PBL');
         const data = await res.json();
         if (data.timestamp !== lastTimestamp) {
           lastTimestamp = data.timestamp;
           const token = data.token;
-          const qrValue = https://t.me/absensi_qr_bot?start=${token}_PBL;
+          const qrValue = `https://t.me/absensi_qr_bot?start=${token}_PBL`;
           qr.value = qrValue;
           document.getElementById('tokenDisplay').textContent = "Token Saat Ini: " + token;
         }
