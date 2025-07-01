@@ -11,7 +11,11 @@
   </style>
 </head>
 <body>
-
+<script>
+  if (sessionStorage.getItem("loginQR") !== "true") {
+    window.location.href = "login.html";
+  }
+</script>
 <script>
   const urlParams = new URLSearchParams(window.location.search);
   const auth = urlParams.get("auth");
