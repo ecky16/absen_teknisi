@@ -1,10 +1,8 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
   <title>QR Absen KRZ</title>
-
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
   <style>
     body { font-family: sans-serif; text-align: center; background-color: #111; color: #fff; padding: 20px; }
@@ -36,13 +34,13 @@
 
     async function fetchToken() {
       try {
-        const res = await fetch('https://script.google.com/macros/s/AKfycbzjYLOPjkm8GvbxCgLFbysK16n1nh6YRTgmKFn7oQTGfNSS9t85JkXwfoAXEHkHbEvVXg/exec?action=getToken&area=KRZ');
+        const res = await fetch('https://script.google.com/macros/s/AKfycbXXXXX/exec?action=getToken&area=KRZ');
         const data = await res.json();
         if (data.timestamp !== lastTimestamp) {
           lastTimestamp = data.timestamp;
           const token = data.token;
-          const url = `https://t.me/absensi_qr_bot?start=${token}_KRZ`;
-          qr.value = url;
+          const qrValue = `https://t.me/absensi_qr_bot?start=${token}_KRZ`;
+          qr.value = qrValue;
           document.getElementById('tokenDisplay').textContent = "Token Saat Ini: " + token;
         }
       } catch (e) {
