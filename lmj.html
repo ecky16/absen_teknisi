@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>QR Absen LMJ</title>
-
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
   <style>
     body { font-family: sans-serif; text-align: center; background-color: #111; color: #fff; padding: 20px; }
@@ -20,7 +19,6 @@
     alert("🔒 Akses ditolak. Silakan login dahulu.");
     window.location.href = "login.html";
   } else {
-    // Hapus parameter auth dari address bar
     window.history.replaceState({}, document.title, window.location.pathname);
   }
 </script>
@@ -41,8 +39,8 @@
         if (data.timestamp !== lastTimestamp) {
           lastTimestamp = data.timestamp;
           const token = data.token;
-          const url = `https://t.me/absensi_qr_bot?start=${token}_LMJ`;
-          qr.value = url;
+          const qrValue = `https://t.me/absensi_qr_bot?start=${token}_LMJ`;
+          qr.value = qrValue;
           document.getElementById('tokenDisplay').textContent = "Token Saat Ini: " + token;
         }
       } catch (e) {
