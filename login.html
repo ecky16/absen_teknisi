@@ -100,12 +100,15 @@
 
 <div class="container">
   <div id="login-form">
-    <form onsubmit="cekPassword(); return false;">
-      <p>Masukkan password untuk mengakses halaman QR:</p>
-      <input type="password" id="pass" placeholder="Password..." />
-      <button type="submit" class="btn">🔓 Masuk</button>
-    </form>
-  </div>
+  <form onsubmit="cekPassword(); return false;">
+    <p>Masukkan password untuk mengakses halaman QR:</p>
+    <div style="max-width: 400px; margin: auto;">
+      <input type="password" id="pass" placeholder="Password..." style="display: block; width: 100%; margin-bottom: 15px;" />
+      <button type="submit" class="btn" style="display: block; width: 100%;">🔒 Masuk</button>
+    </div>
+  </form>
+</div>
+
 
   <div id="area-selection" class="area-selection">
     <p class="area-title">📌 Pilih area untuk menampilkan QR:</p>
