@@ -2,6 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login QR Absen</title>
   <style>
     body {
@@ -72,12 +73,18 @@
       color: #ccc;
     }
     .plasa-button {
-  margin-top: 15px;
-  max-width: 300px;
-  margin-left: auto;
-  margin-right: auto;
-}
+      margin-top: 15px;
+      max-width: 300px;
+      margin-left: auto;
+      margin-right: auto;
+    }
 
+    /* ✅ Responsif khusus untuk HP kecil */
+    @media (max-width: 480px) {
+      .area-grid {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
@@ -100,15 +107,14 @@
   <div id="area-selection" class="area-selection">
     <p class="area-title">📌 Pilih area untuk menampilkan QR:</p>
     <div class="area-grid">
-  <button class="btn" onclick="go('psn.html')">📍 Pasuruan</button>
-  <button class="btn" onclick="go('pbl.html')">📍 Probolinggo</button>
-  <button class="btn" onclick="go('lmj.html')">📍 Lumajang</button>
-  <button class="btn" onclick="go('krz.html')">📍 Kraksaan</button>
-</div>
-
-<div class="plasa-button">
-  <button class="btn" onclick="go('plasa.html')">📍 Plasa</button>
-</div>
+      <button class="btn" onclick="go('psn.html')">📍 Pasuruan</button>
+      <button class="btn" onclick="go('pbl.html')">📍 Probolinggo</button>
+      <button class="btn" onclick="go('lmj.html')">📍 Lumajang</button>
+      <button class="btn" onclick="go('krz.html')">📍 Kraksaan</button>
+    </div>
+    <div class="plasa-button">
+      <button class="btn" onclick="go('plasa.html')">📍 Plasa</button>
+    </div>
   </div>
 </div>
 
@@ -126,34 +132,6 @@
   function go(target) {
     window.location.href = target + '?auth=7qvt6';
   }
-</script>
-
-</body>
-</html>
-
-
-<script>
-  function cekPassword() {
-    const pass = document.getElementById("pass").value;
-    if (pass === "7qvt6") {
-      sessionStorage.setItem("loginQR", "true");
-      document.getElementById("login-form").style.display = "none";
-      document.getElementById("area-selection").style.display = "block";
-    } else {
-      alert("❌ Password salah. Silakan coba lagi.");
-    }
-  }
-
-  function go(area) {
-    window.location.href = area + "?auth=7qvt6";
-  }
-
-  window.onload = function() {
-    if (sessionStorage.getItem("loginQR") === "true") {
-      document.getElementById("login-form").style.display = "none";
-      document.getElementById("area-selection").style.display = "block";
-    }
-  };
 </script>
 
 </body>
