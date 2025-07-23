@@ -99,13 +99,16 @@
 </header>
 
 <div class="container">
-  <div id="login-form">
-    <form onsubmit="cekPassword(); return false;">
-      <p>Masukkan password untuk mengakses halaman QR:</p>
-      <input type="password" id="pass" placeholder="Password..." />
-      <button type="submit" class="btn">🔓 Masuk</button>
-    </form>
-  </div>
+<div id="login-form">
+  <form onsubmit="cekPassword(); return false;">
+    <p>Masukkan password untuk mengakses halaman QR:</p>
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 15px; max-width: 400px; margin: auto;">
+      <input type="password" id="pass" placeholder="Password..." style="padding: 10px; width: 100%; max-width: 300px; border-radius: 8px; font-size: 1.1em;" />
+      <button type="submit" class="btn" style="width: 100%; max-width: 300px;">🔒 Masuk</button>
+    </div>
+  </form>
+</div>
+
 </div>
 
 
