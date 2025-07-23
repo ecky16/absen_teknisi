@@ -123,18 +123,26 @@
 
 <script>
   function cekPassword() {
-    const pass = document.getElementById('pass').value;
-    if (pass === '7qvt6') {
-      document.getElementById('login-form').style.display = 'none';
-      document.getElementById('area-selection').style.display = 'block';
+    const pass = document.getElementById("pass").value;
+    if (pass === "7qvt6") {
+      sessionStorage.setItem("loginQR", "true");
+      document.getElementById("login-form").style.display = "none";
+      document.getElementById("area-selection").style.display = "block";
     } else {
-      alert('❌ Password salah');
+      alert("❌ Password salah. Silakan coba lagi.");
     }
   }
 
-  function go(target) {
-    window.location.href = target + '?auth=7qvt6';
+  function go(area) {
+    window.location.href = area + "?auth=7qvt6";
   }
+
+  window.onload = function() {
+    if (sessionStorage.getItem("loginQR") === "true") {
+      document.getElementById("login-form").style.display = "none";
+      document.getElementById("area-selection").style.display = "block";
+    }
+  };
 </script>
 
 </body>
