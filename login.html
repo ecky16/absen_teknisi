@@ -23,6 +23,10 @@
       margin: 10px 0 0 0;
       font-size: 1.5em;
     }
+    header h2 {
+      margin: 5px 0 0 0;
+      font-size: 1.2em;
+    }
     .container {
       padding: 40px 20px;
     }
@@ -37,24 +41,35 @@
       text-align: center;
     }
     .btn {
-      display: block;
-      width: 80%;
-      max-width: 300px;
-      margin: 10px auto;
-      padding: 15px;
       font-size: 1.1em;
       background-color: #b40000;
       color: #fff;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      padding: 15px;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      width: 100%;
     }
     .btn:hover {
       background-color: #ff1c1c;
+      transform: scale(1.03);
     }
     .area-selection {
       display: none;
+      margin-top: 30px;
+    }
+    .area-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 15px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    .area-title {
+      font-size: 1.2em;
+      margin-bottom: 20px;
+      color: #ccc;
     }
   </style>
 </head>
@@ -76,15 +91,36 @@
   </div>
 
   <div id="area-selection" class="area-selection">
-    <p>Pilih area untuk menampilkan QR:</p>
-    <button class="btn" onclick="go('psn.html')">📍 Pasuruan</button>
-    <button class="btn" onclick="go('pbl.html')">📍 Probolinggo</button>
-    <button class="btn" onclick="go('lmj.html')">📍 Lumajang</button>
-    <button class="btn" onclick="go('krz.html')">📍 Kraksaan</button>
+    <p class="area-title">📌 Pilih area untuk menampilkan QR:</p>
+    <div class="area-grid">
+      <button class="btn" onclick="go('psn.html')">📍 Pasuruan</button>
+      <button class="btn" onclick="go('pbl.html')">📍 Probolinggo</button>
+      <button class="btn" onclick="go('lmj.html')">📍 Lumajang</button>
+      <button class="btn" onclick="go('krz.html')">📍 Kraksaan</button>
       <button class="btn" onclick="go('plasa.html')">📍 Plasa</button>
-    
+    </div>
   </div>
 </div>
+
+<script>
+  function cekPassword() {
+    const pass = document.getElementById('pass').value;
+    if (pass === '7qvt6') {
+      document.getElementById('login-form').style.display = 'none';
+      document.getElementById('area-selection').style.display = 'block';
+    } else {
+      alert('❌ Password salah');
+    }
+  }
+
+  function go(target) {
+    window.location.href = target + '?auth=7qvt6';
+  }
+</script>
+
+</body>
+</html>
+
 
 <script>
   function cekPassword() {
