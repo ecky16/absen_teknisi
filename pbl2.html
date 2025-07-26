@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>QR Absen PROBOLINGGO 2</title>
+  <title>QR Absen PROBOLINGGO2</title>
 
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
   <style>
@@ -25,7 +25,7 @@
   }
 </script>
 
-  <h1>📸 QR Absen Area PROBOLINGGO 2</h1>
+  <h1>📸 QR Absen Area PROBOLINGGO2</h1>
   <div id="qrcode"><canvas id="qr"></canvas></div>
   <div id="waktu"></div>
   <div id="tokenDisplay" style="margin-top:10px; font-size:1.2em; color:#0f0;"></div>
@@ -36,12 +36,12 @@
 
     async function fetchToken() {
       try {
-        const res = await fetch('https://script.google.com/macros/s/AKfycbzjYLOPjkm8GvbxCgLFbysK16n1nh6YRTgmKFn7oQTGfNSS9t85JkXwfoAXEHkHbEvVXg/exec?action=getToken&area=PROBOLINGGO2');
+        const res = await fetch('https://script.google.com/macros/s/AKfycbzjYLOPjkm8GvbxCgLFbysK16n1nh6YRTgmKFn7oQTGfNSS9t85JkXwfoAXEHkHbEvVXg/exec?action=getToken&area=PBL2');
         const data = await res.json();
         if (data.timestamp !== lastTimestamp) {
           lastTimestamp = data.timestamp;
           const token = data.token;
-          const url = `https://t.me/absensi_qr_bot?start=${token}_PROBOLINGGO2`;
+          const url = `https://t.me/absensi_qr_bot?start=${token}_PBL2`;
           qr.value = url;
           document.getElementById('tokenDisplay').textContent = "Token Saat Ini: " + token;
         }
