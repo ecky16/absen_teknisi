@@ -1,158 +1,145 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login QR Absen</title>
   <style>
-:root{
-  --bg:#0d0f10;        /* hitam */
-  --card:#151518;      /* abu gelap */
-  --line:#2a2a2e;      /* garis */
-  --text:#f2f2f3;      /* teks */
-  --muted:#a1a1aa;     /* teks redup */
-  --red:#b40000;       /* merah utama */
-}
+    body { font-family:'Segoe UI',sans-serif; background:#111; color:#fff; text-align:center; margin:0; }
+    header { background:#b40000; padding:20px; }
+    header img { width:220px; }
+    header h1 { margin:10px 0 0; font-size:1.5em; }
+    header h2 { margin:5px 0 0; font-size:1.2em; }
+    .container { padding:40px 20px; }
 
-*,
-*::before,
-*::after { box-sizing: border-box; }
+    input[type="password"]{
+      font-size:1.1em; padding:12px; width:100%; max-width:300px; margin:20px auto 10px;
+      border:1px solid #2a2a2e; border-radius:8px; text-align:center; background:#101010; color:#fff;
+      display:block;
+    }
+    .btn{
+      font-size:1.05em; background:#b40000; color:#fff; border:none; border-radius:10px; cursor:pointer;
+      padding:14px; transition:background-color .3s ease, transform .15s ease; width:100%; max-width:300px; margin:8px auto 0;
+    }
+    .btn:hover{ background:#ff1c1c; transform:scale(1.03); }
 
-html,body{
-  height:100%;
-}
-
-body{
-  margin:0;
-  font-family: system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
-  color:var(--text);
-  background: radial-gradient(1200px 600px at 50% -10%, rgba(255,0,0,.06), transparent 60%),
-              var(--bg);
-  display:flex; align-items:center; justify-content:center;
-  padding:16px;
-}
-
-/* top bar aksen merah */
-.bar-merah{
-  position: fixed; inset:0 0 auto 0; height:6px;
-  background: linear-gradient(90deg, #ff4d4d, var(--red), #ff4d4d);
-  opacity:.8;
-}
-
-/* kartu login */
-.card{
-  width:100%; max-width: 440px;
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 22px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.35);
-}
-
-h1{ margin:0 0 10px; font-size:22px; }
-p{ margin:0 0 14px; color:var(--muted); }
-
-/* form */
-form{ display:flex; flex-direction:column; gap:12px; }
-
-input#pass{
-  width:100%; height: 48px;
-  padding: 0 14px;
-  background:#0f1012;
-  border:1px solid var(--line);
-  border-radius:12px;
-  color:var(--text);
-  font-size:16px;
-  outline:none;
-}
-input#pass::placeholder{ color:#7a7a82; }
-input#pass:focus{
-  border-color: var(--red);
-  box-shadow: 0 0 0 3px rgba(180,0,0,.25);
-}
-
-/
-
+    .area-selection{ display:none; margin-top:24px; }
+    .cluster-badge{ display:inline-block; padding:6px 12px; border:1px solid #ff7a7a; color:#ffd3d3; border-radius:999px; margin-bottom:12px; }
+    .area-title{ font-size:1.1em; margin:6px 0 16px; color:#ccc; }
+    .area-grid{
+      display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:15px; max-width:520px; margin:0 auto;
+    }
+    .area-grid .btn{ max-width:unset; }
+    @media (max-width:480px){ .area-grid{ grid-template-columns:1fr; } }
   </style>
 </head>
 <body>
-<div class="bar-merah"></div>
 
-  <div class="card">
-    <h1>Login QR Absen</h1>
-    <p>Masukkan password cluster:</p>
-    <form onsubmit="login();return false">
-      <input id="pass" type="password" placeholder="Masukkan Password" autofocus />
-      <button type="submit">Masuk</button>
-      <div id="err" class="err">Password salah. Coba lagi.</div>
+<header>
+  <img src="logo_telkom_akses.png" alt="Logo Telkom Akses" />
+  <h1>SAPA - QR</h1>
+  <h2>SISTEM ABSENSI PAKAI QR</h2>
+</header>
+
+<div class="container">
+  <!-- FORM LOGIN -->
+  <div id="login-form">
+    <form onsubmit="cekPassword(); return false;">
+      <p>Masukkan password untuk mengakses halaman QR:</p>
+      <input type="password" id="pass" placeholder="Password (7qvt6 / xvk98)" />
+      <button type="submit" class="btn">🔒 Masuk</button>
+      <div id="err" style="display:none; color:#ffc1c1; margin-top:8px;">Password salah. Coba lagi.</div>
     </form>
-    <div class="tips">Setelah login, buka halaman area langsung.</div>
   </div>
-<script>
-  // Kalau file2 kamu ada di subfolder (mis. /absen_teknisi/), isi BASE_PATH
-  const BASE_PATH = ""; // contoh: "/absen_teknisi/"
 
-  // Password -> halaman tujuan default
-  const DEFAULT_AFTER = {
-    "7qvt6": "psn.html",     // cluster PASURUAN → ke Pasuruan
-    "xvk98": "jember.html"   // cluster JEMBER → ke Jember
+  <!-- PILIHAN AREA SESUAI CLUSTER -->
+  <div id="area-selection" class="area-selection">
+    <div class="cluster-badge" id="clusterBadge">Cluster</div>
+    <p class="area-title">📌 Pilih area untuk menampilkan QR:</p>
+    <div class="area-grid" id="areaGrid"></div>
+    <div style="margin-top:14px;">
+      <button class="btn" onclick="logout()">Ganti Cluster</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---- KONFIG: daftar cluster & sub-area ----
+  // href = nama file sub-area kamu
+  const CLUSTERS = {
+    "7qvt6": {
+      name: "PASURUAN",
+      areas: [
+        { label:"📍 Pasuruan",     href:"psn.html" },
+        { label:"📍 Plasa",        href:"plasa.html" },
+        { label:"📍 Probolinggo",  href:"pbl.html" },
+        { label:"📍 Probolinggo 2",href:"pbl2.html" },
+        { label:"📍 Kraksaan",     href:"krz.html" },
+        { label:"📍 Lumajang",     href:"lmj.html" },
+      ]
+    },
+    "xvk98": {
+      name: "JEMBER",
+      areas: [
+        { label:"📍 Jember",       href:"jember.html" },
+        { label:"📍 Kebonsari",    href:"kebonsari.html" },
+        { label:"📍 Puger",        href:"puger.html" },
+        { label:"📍 Situbondo",    href:"situbondo.html" },
+        { label:"📍 Bondowoso",    href:"bondowoso.html" },
+        { label:"📍 Banyuwangi",   href:"banyuwangi.html" },
+        { label:"📍 Genteng",      href:"genteng.html" },
+      ]
+    }
   };
 
-  const CLUSTERS = { "7qvt6": "PASURUAN", "xvk98": "JEMBER" };
+  const BASE_PATH = ""; // isi "/nama-repo/" jika file di subfolder GitHub Pages
 
-  // Support ?next=xxx.html untuk paksa tujuan tertentu
-  const nextParam = new URLSearchParams(location.search).get("next");
-
-  // Helper redirect
-  function go(dest) {
-    // pakai replace biar gak balik ke login kalau tekan Back
-    location.replace(BASE_PATH + dest);
+  function renderAreas(key){
+    const cfg = CLUSTERS[key]; if(!cfg) return;
+    document.getElementById('clusterBadge').textContent = "Cluster " + cfg.name;
+    const grid = document.getElementById('areaGrid');
+    grid.innerHTML = "";
+    cfg.areas.forEach(a => {
+      const b = document.createElement('button');
+      b.className = "btn";
+      b.textContent = a.label;
+      b.onclick = () => { location.href = BASE_PATH + a.href; }; // TANPA ?auth
+      grid.appendChild(b);
+    });
   }
 
-  function login() {
-    const passEl = document.getElementById('pass');
-    const errEl  = document.getElementById('err');
-    const v = passEl.value.trim();
+  function cekPassword(){
+    const pass = document.getElementById("pass").value.trim();
+    const ok = !!CLUSTERS[pass];
+    document.getElementById('err').style.display = ok ? 'none' : 'block';
+    if (!ok) return;
 
-    if (CLUSTERS[v]) {
-      // set sesi
-      sessionStorage.setItem('loginQR', 'true');
-      sessionStorage.setItem('clusterKey', v);
-
-      // sembunyikan error jika sebelumnya sempat tampil
-      if (errEl) errEl.style.display = 'none';
-
-      // tentukan tujuan
-      const dest = nextParam ? nextParam : DEFAULT_AFTER[v];
-
-      // langsung pindah
-      go(dest);
-    } else {
-      if (errEl) errEl.style.display = 'block';
-    }
+    // simpan sesi & tampilkan menu cluster
+    sessionStorage.setItem("loginQR","true");
+    sessionStorage.setItem("clusterKey", pass);
+    document.getElementById("login-form").style.display = "none";
+    document.getElementById("area-selection").style.display = "block";
+    renderAreas(pass);
   }
 
-  // Enter di input langsung submit
-  document.addEventListener('DOMContentLoaded', () => {
-    const form = document.querySelector('form');
-    const passEl = document.getElementById('pass');
-    const errEl  = document.getElementById('err');
+  function logout(){
+    sessionStorage.removeItem("loginQR");
+    sessionStorage.removeItem("clusterKey");
+    document.getElementById("area-selection").style.display = "none";
+    document.getElementById("login-form").style.display = "block";
+    document.getElementById("pass").value = "";
+  }
 
-    if (form) form.addEventListener('submit', (e) => { e.preventDefault(); login(); });
-
-    // Ketik lagi → sembunyikan error
-    if (passEl && errEl) passEl.addEventListener('input', () => { errEl.style.display = 'none'; });
-
-    // Kalau sudah login & kembali ke login.html → auto lompat
-    const key = sessionStorage.getItem('clusterKey');
-    if (CLUSTERS[key]) {
-      const dest = nextParam ? nextParam : DEFAULT_AFTER[key];
-      go(dest);
+  // Saat reload: kalau sudah login, langsung tampilkan pilihan cluster yg sesuai
+  window.onload = function(){
+    const key = sessionStorage.getItem("clusterKey");
+    if (sessionStorage.getItem("loginQR")==="true" && CLUSTERS[key]){
+      document.getElementById("login-form").style.display = "none";
+      document.getElementById("area-selection").style.display = "block";
+      renderAreas(key);
     }
-  });
+  };
 </script>
-
-
 
 </body>
 </html>
