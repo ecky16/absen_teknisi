@@ -89,32 +89,56 @@ input#pass:focus{
     <div class="tips">Setelah login, buka halaman area langsung.</div>
   </div>
 <script>
-  // mapping: password -> halaman tujuan awal
-  const DEFAULT_AFTER = {
-    "7qvt6": "psn.html",     // cluster PASURUAN -> buka Pasuruan dulu
-    "xvk98": "jember.html"   // cluster JEMBER -> buka Jember dulu
-  };
+  // === SETEL PATH DASAR (kalau file di subfolder GitHub Pages, isi aja) ===
+  // contoh: const BASE_PATH = "/absen_teknisi/";
+  const BASE_PATH = ""; // biarkan "" jika semua file sejajar dengan login.html
 
-  // ambil ?next=... kalau kamu mau paksa tujuan tertentu
-  const next = new URLSearchParams(location.search).get("next");
+  // mapping: password -> nama file tujuan default
+  const DEFAULT_AFTER = {
+    "7qvt6": "psn.html",     // cluster PASURUAN
+    "xvk98": "jember.html"   // cluster JEMBER
+  };
 
   const CLUSTERS = { "7qvt6":"PASURUAN", "xvk98":"JEMBER" };
 
+  // support query ?next=xxx.html untuk paksa tujuan tertentu
+  const url = new URL(window.location.href);
+  const next = url.searchParams.get("next");
+
+  function go(dest) {
+    // pakai assign agar bisa back; kalau mau tidak bisa back, pakai replace
+    window.location.assign(BASE_PATH + dest);
+  }
+
   function login(){
     const v = document.getElementById('pass').value.trim();
+    const err = document.getElementById('err');
     if (CLUSTERS[v]) {
       sessionStorage.setItem('loginQR','true');
       sessionStorage.setItem('clusterKey', v);
+      err.style.display = 'none';
 
-      // tentukan tujuan
       const dest = next ? next : DEFAULT_AFTER[v];
-      // pindah halaman
-      location.href = dest;
+      go(dest);
     } else {
-      document.getElementById('err').style.display='block';
+      err.style.display = 'block';
     }
   }
+
+  // enter key tetap jalan walau bukan klik tombol
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.querySelector('form');
+    form.addEventListener('submit', (e) => { e.preventDefault(); login(); });
+
+    // kalau sudah login & buka login.html lagi → auto direct ke default cluster-nya
+    const key = sessionStorage.getItem('clusterKey');
+    if (CLUSTERS[key]) {
+      const dest = next ? next : DEFAULT_AFTER[key];
+      go(dest);
+    }
+  });
 </script>
+
 
 </body>
 </html>
