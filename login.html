@@ -88,18 +88,33 @@ input#pass:focus{
     </form>
     <div class="tips">Setelah login, buka halaman area langsung.</div>
   </div>
-  <script>
-    const CLUSTERS = { "7qvt6":"PASURUAN", "xvk98":"JEMBER" };
-    function login(){
-      const v = document.getElementById('pass').value.trim();
-      if(CLUSTERS[v]){
-        sessionStorage.setItem('loginQR','true');
-        sessionStorage.setItem('clusterKey', v);
-        alert('✅ Login berhasil ke Cluster ' + CLUSTERS[v] + '. Silakan buka halaman area.');
-      } else {
-        document.getElementById('err').style.display='block';
-      }
+<script>
+  // mapping: password -> halaman tujuan awal
+  const DEFAULT_AFTER = {
+    "7qvt6": "psn.html",     // cluster PASURUAN -> buka Pasuruan dulu
+    "xvk98": "jember.html"   // cluster JEMBER -> buka Jember dulu
+  };
+
+  // ambil ?next=... kalau kamu mau paksa tujuan tertentu
+  const next = new URLSearchParams(location.search).get("next");
+
+  const CLUSTERS = { "7qvt6":"PASURUAN", "xvk98":"JEMBER" };
+
+  function login(){
+    const v = document.getElementById('pass').value.trim();
+    if (CLUSTERS[v]) {
+      sessionStorage.setItem('loginQR','true');
+      sessionStorage.setItem('clusterKey', v);
+
+      // tentukan tujuan
+      const dest = next ? next : DEFAULT_AFTER[v];
+      // pindah halaman
+      location.href = dest;
+    } else {
+      document.getElementById('err').style.display='block';
     }
-  </script>
+  }
+</script>
+
 </body>
 </html>
