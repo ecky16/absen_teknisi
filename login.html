@@ -96,7 +96,7 @@
 
   function renderAreas(key){
     const cfg = CLUSTERS[key]; if(!cfg) return;
-    document.getElementById('clusterBadge').textContent = "Cluster " + cfg.name;
+    document.getElementById('clusterBadge').textContent = "Area " + cfg.name;
     const grid = document.getElementById('areaGrid');
     grid.innerHTML = "";
     cfg.areas.forEach(a => {
