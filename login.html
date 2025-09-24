@@ -89,55 +89,69 @@ input#pass:focus{
     <div class="tips">Setelah login, buka halaman area langsung.</div>
   </div>
 <script>
-  // === SETEL PATH DASAR (kalau file di subfolder GitHub Pages, isi aja) ===
-  // contoh: const BASE_PATH = "/absen_teknisi/";
-  const BASE_PATH = ""; // biarkan "" jika semua file sejajar dengan login.html
+  // Kalau file2 kamu ada di subfolder (mis. /absen_teknisi/), isi BASE_PATH
+  const BASE_PATH = ""; // contoh: "/absen_teknisi/"
 
-  // mapping: password -> nama file tujuan default
+  // Password -> halaman tujuan default
   const DEFAULT_AFTER = {
-    "7qvt6": "psn.html",     // cluster PASURUAN
-    "xvk98": "jember.html"   // cluster JEMBER
+    "7qvt6": "psn.html",     // cluster PASURUAN → ke Pasuruan
+    "xvk98": "jember.html"   // cluster JEMBER → ke Jember
   };
 
-  const CLUSTERS = { "7qvt6":"PASURUAN", "xvk98":"JEMBER" };
+  const CLUSTERS = { "7qvt6": "PASURUAN", "xvk98": "JEMBER" };
 
-  // support query ?next=xxx.html untuk paksa tujuan tertentu
-  const url = new URL(window.location.href);
-  const next = url.searchParams.get("next");
+  // Support ?next=xxx.html untuk paksa tujuan tertentu
+  const nextParam = new URLSearchParams(location.search).get("next");
 
+  // Helper redirect
   function go(dest) {
-    // pakai assign agar bisa back; kalau mau tidak bisa back, pakai replace
-    window.location.assign(BASE_PATH + dest);
+    // pakai replace biar gak balik ke login kalau tekan Back
+    location.replace(BASE_PATH + dest);
   }
 
-  function login(){
-    const v = document.getElementById('pass').value.trim();
-    const err = document.getElementById('err');
-    if (CLUSTERS[v]) {
-      sessionStorage.setItem('loginQR','true');
-      sessionStorage.setItem('clusterKey', v);
-      err.style.display = 'none';
+  function login() {
+    const passEl = document.getElementById('pass');
+    const errEl  = document.getElementById('err');
+    const v = passEl.value.trim();
 
-      const dest = next ? next : DEFAULT_AFTER[v];
+    if (CLUSTERS[v]) {
+      // set sesi
+      sessionStorage.setItem('loginQR', 'true');
+      sessionStorage.setItem('clusterKey', v);
+
+      // sembunyikan error jika sebelumnya sempat tampil
+      if (errEl) errEl.style.display = 'none';
+
+      // tentukan tujuan
+      const dest = nextParam ? nextParam : DEFAULT_AFTER[v];
+
+      // langsung pindah
       go(dest);
     } else {
-      err.style.display = 'block';
+      if (errEl) errEl.style.display = 'block';
     }
   }
 
-  // enter key tetap jalan walau bukan klik tombol
+  // Enter di input langsung submit
   document.addEventListener('DOMContentLoaded', () => {
     const form = document.querySelector('form');
-    form.addEventListener('submit', (e) => { e.preventDefault(); login(); });
+    const passEl = document.getElementById('pass');
+    const errEl  = document.getElementById('err');
 
-    // kalau sudah login & buka login.html lagi → auto direct ke default cluster-nya
+    if (form) form.addEventListener('submit', (e) => { e.preventDefault(); login(); });
+
+    // Ketik lagi → sembunyikan error
+    if (passEl && errEl) passEl.addEventListener('input', () => { errEl.style.display = 'none'; });
+
+    // Kalau sudah login & kembali ke login.html → auto lompat
     const key = sessionStorage.getItem('clusterKey');
     if (CLUSTERS[key]) {
-      const dest = next ? next : DEFAULT_AFTER[key];
+      const dest = nextParam ? nextParam : DEFAULT_AFTER[key];
       go(dest);
     }
   });
 </script>
+
 
 
 </body>
