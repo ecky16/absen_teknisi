@@ -50,30 +50,51 @@ const REQUIRED_AUTH = "xvk98";
   const BOT_DEEPLINK_BASE = "https://t.me/absensi_qr_bot?start=";
 
   const qr = new QRious({ element: document.getElementById('qr'), size: 320, value: 'Memuat...' });
+
+  let lastToken = "";
   let lastTimestamp = "";
 
   async function fetchToken() {
+    const url = `${GAS_URL}?action=getToken&area=${encodeURIComponent(AREA)}&t=${Date.now()}`;
     try {
-      const url = `${GAS_URL}?action=getToken&area=${encodeURIComponent(AREA)}&t=${Date.now()}`;
-      const res = await fetch(url, { cache: 'no-store' });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const data = await res.json();
-      if (!data || !data.token) throw new Error('Token kosong');
+      // timeout biar gak ngegantung
+      const ctrl = new AbortController();
+      const to = setTimeout(() => ctrl.abort(), 8000);
 
-      if (data.timestamp !== lastTimestamp) {
-        lastTimestamp = data.timestamp || '';
-        const token = data.token;
-        const qrValue = `${BOT_DEEPLINK_BASE}${encodeURIComponent(token + '_' + AREA)}`;
+      const res = await fetch(url, { cache: 'no-store', signal: ctrl.signal });
+      clearTimeout(to);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+
+      const data = await res.json();
+      if (!data || !data.token) throw new Error('Token kosong / format salah');
+
+      const tokenNow = String(data.token);
+
+      // bersihkan status error kalau sukses
+      document.getElementById('tokenDisplay').textContent = "Token Saat Ini: " + tokenNow;
+
+      // set QR kalau token berubah ATAU sebelumnya sempat error
+      const wasError = /Error/i.test(document.getElementById('tokenDisplay').textContent);
+      if (tokenNow !== lastToken || wasError) {
+        const qrValue = `${BOT_DEEPLINK_BASE}${encodeURIComponent(tokenNow + '_' + AREA)}`;
         qr.value = qrValue;
-        document.getElementById('tokenDisplay').textContent = "Token Saat Ini: " + token;
+        lastToken = tokenNow;
       }
+
+      if (data.timestamp != null) lastTimestamp = data.timestamp;
     } catch (e) {
-      console.error(e);
-      qr.value = '❌ Gagal ambil token';
+      console.error('fetchToken error:', e);
+      // tampilkan error sementara — panggilan berikutnya akan menimpa
       document.getElementById('tokenDisplay').textContent = "Token Error";
+      qr.value = '❌ Gagal ambil token';
     }
   }
 
+  // Saat tab kembali aktif dari background, refresh sekali
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) fetchToken();
+  });
+</script>
   function updateTime() {
     const now = new Date();
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
