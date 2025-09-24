@@ -22,8 +22,9 @@
 
 <script>
   const REQUIRED_AUTH = "xvk98";
-  const cluster = sessionStorage.getItem('clusterKey');
-  if (!cluster || cluster !== REQUIRED_AUTH) {
+const cluster = sessionStorage.getItem('clusterKey');
+if (!cluster || cluster !== "xvk98") location.href = "login.html";
+
     alert("🔒 Akses ditolak. Silakan login dahulu.");
     window.location.href = "login.html";
   } else {
