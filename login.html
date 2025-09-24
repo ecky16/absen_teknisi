@@ -1,149 +1,105 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login QR Absen</title>
   <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #111;
-      color: #fff;
-      text-align: center;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background-color: #b40000;
-      padding: 20px;
-    }
-    header img {
-      width: 220px;
-    }
-    header h1 {
-      margin: 10px 0 0 0;
-      font-size: 1.5em;
-    }
-    header h2 {
-      margin: 5px 0 0 0;
-      font-size: 1.2em;
-    }
-    .container {
-      padding: 40px 20px;
-    }
-    input[type="password"] {
-      font-size: 1.2em;
-      padding: 10px;
-      width: 80%;
-      max-width: 300px;
-      margin: 20px 0;
-      border: none;
-      border-radius: 5px;
-      text-align: center;
-    }
- .btn {
-  font-size: 1.1em;
-  background-color: #b40000;
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  padding: 15px;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-  width: 100%;
-  max-width: 300px; /* ✅ Tambahkan ini */
-  margin: 0 auto;    /* ✅ Tengahin di layar lebar */
+:root{
+  --bg:#0d0f10;        /* hitam */
+  --card:#151518;      /* abu gelap */
+  --line:#2a2a2e;      /* garis */
+  --text:#f2f2f3;      /* teks */
+  --muted:#a1a1aa;     /* teks redup */
+  --red:#b40000;       /* merah utama */
 }
 
-    .btn:hover {
-      background-color: #ff1c1c;
-      transform: scale(1.03);
-    }
-    .area-selection {
-      display: none;
-      margin-top: 30px;
-    }
-    .area-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 15px;
-      max-width: 500px;
-      margin: 0 auto;
-    }
-    .area-title {
-      font-size: 1.2em;
-      margin-bottom: 20px;
-      color: #ccc;
-    }
- 
+*,
+*::before,
+*::after { box-sizing: border-box; }
 
-    /* ✅ Responsif khusus untuk HP kecil */
-    @media (max-width: 480px) {
-      .area-grid {
-        grid-template-columns: 1fr;
-      }
-    }
+html,body{
+  height:100%;
+}
+
+body{
+  margin:0;
+  font-family: system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+  color:var(--text);
+  background: radial-gradient(1200px 600px at 50% -10%, rgba(255,0,0,.06), transparent 60%),
+              var(--bg);
+  display:flex; align-items:center; justify-content:center;
+  padding:16px;
+}
+
+/* top bar aksen merah */
+.bar-merah{
+  position: fixed; inset:0 0 auto 0; height:6px;
+  background: linear-gradient(90deg, #ff4d4d, var(--red), #ff4d4d);
+  opacity:.8;
+}
+
+/* kartu login */
+.card{
+  width:100%; max-width: 440px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+
+h1{ margin:0 0 10px; font-size:22px; }
+p{ margin:0 0 14px; color:var(--muted); }
+
+/* form */
+form{ display:flex; flex-direction:column; gap:12px; }
+
+input#pass{
+  width:100%; height: 48px;
+  padding: 0 14px;
+  background:#0f1012;
+  border:1px solid var(--line);
+  border-radius:12px;
+  color:var(--text);
+  font-size:16px;
+  outline:none;
+}
+input#pass::placeholder{ color:#7a7a82; }
+input#pass:focus{
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px rgba(180,0,0,.25);
+}
+
+/
+
   </style>
 </head>
 <body>
+<div class="bar-merah"></div>
 
-<header>
-  <img src="logo_telkom_akses.png" alt="Logo Telkom Akses" />
-  <h1>SAPA - QR </h1>
-  <h2>SISTEM ABSENSI PAKAI QR</h2>
-</header>
-
-<div class="container">
-<div id="login-form">
-  <form onsubmit="cekPassword(); return false;">
-    <p>Masukkan password untuk mengakses halaman QR:</p>
-    <div style="display: flex; flex-direction: column; align-items: center; gap: 15px; max-width: 400px; margin: auto;">
-      <input type="password" id="pass" placeholder="Password..." style="padding: 10px; width: 100%; max-width: 300px; border-radius: 8px; font-size: 1.1em;" />
-      <button type="submit" class="btn" style="width: 100%; max-width: 300px;">🔒 Masuk</button>
-    </div>
-  </form>
-</div>
-
-</div>
-
-
-  <div id="area-selection" class="area-selection">
-    <p class="area-title">📌 Pilih area untuk menampilkan QR:</p>
-    <div class="area-grid">
-      <button class="btn" onclick="go('psn.html')">📍 Pasuruan</button>
-      <button class="btn" onclick="go('plasa.html')">📍 Plasa</button>
-      <button class="btn" onclick="go('pbl.html')">📍 Probolinggo</button>
-      <button class="btn" onclick="go('pbl2.html')">📍 Probolinggo 2</button>
-      <button class="btn" onclick="go('krz.html')">📍 Kraksaan</button>
-      <button class="btn" onclick="go('lmj.html')">📍 Lumajang</button>
-      
-    </div>
+  <div class="card">
+    <h1>Login QR Absen</h1>
+    <p>Masukkan password cluster:</p>
+    <form onsubmit="login();return false">
+      <input id="pass" type="password" placeholder="Masukkan Password" autofocus />
+      <button type="submit">Masuk</button>
+      <div id="err" class="err">Password salah. Coba lagi.</div>
+    </form>
+    <div class="tips">Setelah login, buka halaman area langsung.</div>
   </div>
-</div>
-
-<script>
-  function cekPassword() {
-    const pass = document.getElementById("pass").value;
-    if (pass === "7qvt6") {
-      sessionStorage.setItem("loginQR", "true");
-      document.getElementById("login-form").style.display = "none";
-      document.getElementById("area-selection").style.display = "block";
-    } else {
-      alert("❌ Password salah. Silakan coba lagi.");
+  <script>
+    const CLUSTERS = { "7qvt6":"PASURUAN", "xvk98":"JEMBER" };
+    function login(){
+      const v = document.getElementById('pass').value.trim();
+      if(CLUSTERS[v]){
+        sessionStorage.setItem('loginQR','true');
+        sessionStorage.setItem('clusterKey', v);
+        alert('✅ Login berhasil ke Cluster ' + CLUSTERS[v] + '. Silakan buka halaman area.');
+      } else {
+        document.getElementById('err').style.display='block';
+      }
     }
-  }
-
-  function go(area) {
-    window.location.href = area + "?auth=7qvt6";
-  }
-
-  window.onload = function() {
-    if (sessionStorage.getItem("loginQR") === "true") {
-      document.getElementById("login-form").style.display = "none";
-      document.getElementById("area-selection").style.display = "block";
-    }
-  };
-</script>
-
+  </script>
 </body>
 </html>
