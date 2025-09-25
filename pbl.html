@@ -152,17 +152,27 @@
     }
   }
 
-  function startPolling(){
-    stopPolling();
-    const tick = async () => {
-      await fetchToken();
-      const base = INTERVAL_MS;
-      const delay = base * (backoff ? Math.min(4, 2 ** backoff) : 1);
-      timer = setTimeout(tick, delay);
-      if (elStatus.classList.contains('err')) backoff = Math.min(backoff + 1, 4); else backoff = 0;
-    };
-    timer = setTimeout(tick, 0);
-  }
+function startPolling(){
+  stopPolling();
+  const tick = async () => {
+    await fetchToken();
+
+    // hitung base interval (siang/malam) + backoff + jitter
+    const base = currentBaseInterval();
+    const backoffMul = elStatus.classList.contains('err') ? Math.min(16, 2 ** backoff) : 1; // 1,2,4,8,16
+    const delay = withJitter(base * backoffMul);
+
+    // naikkan backoff hanya saat error; reset kalau sukses
+    if (elStatus.classList.contains('err')) backoff = Math.min(backoff + 1, 4);
+    else backoff = 0;
+
+    timer = setTimeout(tick, delay);
+  };
+
+  // startup delay: sedikit jitter supaya tidak bareng dengan device lain
+  timer = setTimeout(tick, withJitter(200));
+}
+
   function stopPolling(){ if (timer) { clearTimeout(timer); timer = null; } }
 
   document.addEventListener('visibilitychange', () => {
