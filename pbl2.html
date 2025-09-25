@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>QR Absen PBL2 — v2.5</title>
+  <title>QR Absen PBL2 — v2.6</title>
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
   <style>
     :root {
@@ -41,7 +41,7 @@
   </style>
 </head>
 <body>
-  <header><h1>📸 QR Absen — Area <span id="areaLabel">PBL2</span></h1></header>
+  <header><h1>📸 QR Absen — Area PBL2</h1></header>
   <main>
     <section class="board">
       <div class="qr-wrap"><canvas id="qr" width="360" height="360" aria-label="Kode QR"></canvas></div>
@@ -50,13 +50,13 @@
       <div class="time" id="waktu">—</div>
       <div class="status" id="status">Siap.</div>
     </section>
-    <footer>SAPA QR v2.5 • 2025</footer>
+    <footer>SAPA QR v2.6 • 2025</footer>
   </main>
 
 <script>
 (() => {
   // === KONFIG ===
-  const AREA = "PBL2"; // Area fix
+  const AREA = "PBL2"; // Area ditetapkan fix
   const GAS_URL = "https://script.google.com/macros/s/AKfycbzjYLOPjkm8GvbxCgLFbysK16n1nh6YRTgmKFn7oQTGfNSS9t85JkXwfoAXEHkHbEvVXg/exec";
   const BOT_DEEPLINK_BASE = "https://t.me/absensi_qr_bot?start=";
   const REQUIRED_AUTH = "7qvt6";
@@ -69,8 +69,6 @@
     alert('🔒 Akses ditolak. Silakan login dahulu.');
     location.href = 'login.html';
   }
-
-  document.getElementById('areaLabel').textContent = AREA;
 
   const elQR = document.getElementById('qr');
   const elToken = document.getElementById('tokenDisplay');
