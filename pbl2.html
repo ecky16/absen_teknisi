@@ -6,16 +6,28 @@
   <title>QR Absen PBL2</title>
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
   <style>
-    body { font-family: system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif; text-align: center; background-color: #111; color: #fff; margin:0; padding: 20px; }
-    header { background:#b40000; padding:16px; margin:-20px -20px 20px; }
-    header h1 { font-size:20px; margin:0; }
-    #qrcode { margin: 20px auto; }
-    #waktu { font-size: 1.2em; margin-top: 10px; color:#ddd; }
-    #tokenDisplay { margin-top:10px; font-size:1.05em; color:#7CFC00; }
-    .note { color:#bbb; font-size:.9em; margin-top:8px; }
-    .bar { display:flex; gap:8px; justify-content:center; margin-top:12px; flex-wrap:wrap; }
-    .btn { background:#2a2a2a; color:#fff; border:none; padding:10px 12px; border-radius:10px; cursor:pointer; }
-    a.btn { text-decoration:none; }
+ body { font-family: system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif; text-align: center; background-color: #111; color: #fff; margin:0; padding: 20px; }
+  header { background:#b40000; padding:16px; margin:-20px -20px 20px; }
+  header h1 { font-size:20px; margin:0; }
+  #qrcode { margin: 20px auto; }
+  #waktu { font-size: 1.2em; margin-top: 10px; color:#ddd; }
+  #tokenDisplay { margin-top:10px; font-size:1.05em; color:#7CFC00; }
+  .note { color:#bbb; font-size:.9em; margin-top:8px; }
+  .bar { display:flex; gap:8px; justify-content:center; margin-top:12px; flex-wrap:wrap; }
+  .btn { background:#2a2a2a; color:#fff; border:none; padding:10px 12px; border-radius:10px; cursor:pointer; }
+  a.btn { text-decoration:none; }
+
+  /* === Tambahan baru untuk QR === */
+  .qr-wrap{
+    display:inline-block;
+    background:#fff;       /* bingkai putih (quiet zone) */
+    padding:16px;          /* 16–20px ideal */
+    border-radius:8px;     /* opsional */
+    box-shadow:0 0 0 1px #fff; /* pastikan tepi terang */
+  }
+  #qr{
+    image-rendering: pixelated; /* biar modul QR tetap tajam */
+  }
   </style>
 </head>
 <body>
@@ -35,7 +47,7 @@
 
 <header><h1>📸 QR Absen Area PBL2</h1></header>
 
-<div id="qrcode"><canvas id="qr"></canvas></div>
+<div id="qrcode" class="qr-wrap"><canvas id="qr"></canvas></div>
 <div id="waktu"></div>
 <div id="tokenDisplay"></div>
 <div class="note">Auto-refresh setiap 2 detik (real-time saat ramai).</div>
@@ -49,7 +61,15 @@
   const AREA = "PBL2";
   const BOT_DEEPLINK_BASE = "https://t.me/absensi_qr_bot?start=";
 
-  const qr = new QRious({ element: document.getElementById('qr'), size: 320, value: 'Memuat...' });
+  const qr = new QRious({
+  element: document.getElementById('qr'),
+  value: 'Memuat...',
+  size: 360,          // dari 320 -> 360
+  level: 'H',         // koreksi tinggi
+  background: '#ffffff',
+  foreground: '#000000'
+});
+
 
   let lastToken = "";
   let lastTimestamp = "";
@@ -71,7 +91,17 @@
       const tokenNow = String(data.token);
 
       // bersihkan status error kalau sukses
-      document.getElementById('tokenDisplay').textContent = "Token Saat Ini: " + tokenNow;
+      const el = document.getElementById('tokenDisplay');
+const prevText = el.textContent;                 // <-- simpan teks lama
+el.textContent = "Token Saat Ini: " + tokenNow;  // tulis yang baru
+const wasError = /Error/i.test(prevText);        // <-- cek SEBELUM ditimpa
+
+if (tokenNow !== lastToken || wasError) {
+  const qrValue = `${BOT_DEEPLINK_BASE}${encodeURIComponent(tokenNow + '_' + AREA)}`;
+  qr.value = qrValue;
+  lastToken = tokenNow;
+}
+
 
       // set QR kalau token berubah ATAU sebelumnya sempat error
       const wasError = /Error/i.test(document.getElementById('tokenDisplay').textContent);
