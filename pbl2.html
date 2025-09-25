@@ -31,24 +31,21 @@
 
     .status { margin-top: 12px; font-size: 13px; color: var(--muted); }
     .status.ok { color: #00d68f; }
-    .status.err { color: var(--danger); }
+    .status.err { color: #ff4d4f; }
 
-    /* Link Ganti Area */
     .actions { margin-top: 12px; }
     .actions a { background:#21242a; color:#fff; border:1px solid #2a2e35; padding:8px 12px; border-radius:12px; text-decoration:none; display:inline-block; }
 
     footer { text-align:center; color:#8b90a0; font-size:12px; margin: 18px 0 28px; }
 
-    @media (max-width: 420px){
-      header h1 { font-size: 16px; }
-    }
+    @media (max-width: 420px){ header h1 { font-size: 16px; } }
   </style>
 </head>
 <body>
   <header><h1>📸 QR Absen — Area PBL2</h1></header>
   <main>
     <section class="board">
-      <div class="qr-wrap"><canvas id="qr" width="260" height="260" aria-label="Kode QR"></canvas></div>
+      <div class="qr-wrap"><canvas id="qr" width="360" height="360" aria-label="Kode QR"></canvas></div>
       <div class="sub" id="note">Auto-refresh setiap <b><span id="refreshSec">2</span>s</b>.</div>
       <div class="token" id="tokenDisplay">Memuat token…</div>
       <div class="time" id="waktu">—</div>
@@ -60,20 +57,22 @@
 
 <script>
 (() => {
+  // === LOGIN GUARD (cluster) ===
+  const REQUIRED_AUTH = "7qvt6";
+  const clusterKey = sessionStorage.getItem('clusterKey') || localStorage.getItem('clusterKey') || sessionStorage.getItem('loginQR');
+  if (!clusterKey || clusterKey !== REQUIRED_AUTH) {
+    alert("🔒 Akses ditolak. Silakan login dahulu.");
+    location.href = "login.html";
+    return;
+  }
+
   // === KONFIG ===
-  const AREA = "PBL2"; // Area ditetapkan fix
+  const AREA = "PBL2"; // fixed
   const GAS_URL = "https://script.google.com/macros/s/AKfycbzjYLOPjkm8GvbxCgLFbysK16n1nh6YRTgmKFn7oQTGfNSS9t85JkXwfoAXEHkHbEvVXg/exec";
   const BOT_DEEPLINK_BASE = "https://t.me/absensi_qr_bot?start=";
-  const REQUIRED_AUTH = "7qvt6";
   const INTERVAL_MS = 2000;
   const FETCH_TIMEOUT = 8000;
   const QR_MAX = 420, QR_MIN = 220;
-
-  const clusterKey = sessionStorage.getItem('clusterKey') || localStorage.getItem('clusterKey') || sessionStorage.getItem('loginQR');
-  if (!clusterKey || clusterKey !== REQUIRED_AUTH) {
-    alert('🔒 Akses ditolak. Silakan login dahulu.');
-    location.href = 'login.html';
-  }
 
   const elQR = document.getElementById('qr');
   const elToken = document.getElementById('tokenDisplay');
@@ -111,7 +110,7 @@
   setInterval(fmtNow, 1000); fmtNow();
 
   function buildLink(token){
-    return BOT_DEEPLINK_BASE + encodeURIComponent(`${token}_${AREA}`);
+    return BOT_DEEPLINK_BASE + encodeURIComponent(token + "_" + AREA);
   }
 
   async function fetchWithTimeout(url, ms){

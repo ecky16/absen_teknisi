@@ -6,41 +6,39 @@
   <title>QR Absen PBL — v2.6</title>
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
   <style>
-    :root {{
+    :root {
       --bg: #0d0d0f;
       --card: #17171b;
       --text: #f5f7fb;
       --muted: #aab0bd;
       --danger: #ff4d4f;
       --brand: #b40000;
-    }}
-    * {{ box-sizing: border-box; }}
-    body {{ margin:0; font-family: system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif; color: var(--text); background: var(--bg); }}
-    header {{ background: var(--brand); padding: 16px; text-align: center; position: sticky; top: 0; z-index: 2; }}
-    header h1 {{ margin:0; font-size: 18px; letter-spacing:.2px }}
+    }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif; color: var(--text); background: var(--bg); }
+    header { background: var(--brand); padding: 16px; text-align: center; position: sticky; top: 0; z-index: 2; }
+    header h1 { margin:0; font-size: 18px; letter-spacing:.2px }
 
-    main {{ max-width: 760px; margin: 18px auto; padding: 0 16px; }}
-    .board {{ background: var(--card); border: 1px solid #22252b; border-radius: 14px; padding: 18px; text-align: center; box-shadow: 0 8px 24px rgb(0 0 0 / .25); }}
+    main { max-width: 760px; margin: 18px auto; padding: 0 16px; }
+    .board { background: var(--card); border: 1px solid #22252b; border-radius: 14px; padding: 18px; text-align: center; box-shadow: 0 8px 24px rgb(0 0 0 / .25); }
 
-    .qr-wrap {{ display: inline-block; background: #fff; padding: 18px; border-radius: 10px; box-shadow: 0 0 0 1px #fff; }}
-    canvas#qr {{ display:block; image-rendering: pixelated; }}
+    .qr-wrap { display: inline-block; background: #fff; padding: 18px; border-radius: 10px; box-shadow: 0 0 0 1px #fff; }
+    canvas#qr { display:block; image-rendering: pixelated; }
 
-    .sub {{ margin-top: 10px; font-size: 14px; color: var(--muted); }}
-    .token {{ margin-top: 8px; font-size: 15px; color: #7CFC00; word-break: break-all; }}
-    .time {{ margin-top: 2px; font-size: 14px; color: #d7d9de; }}
+    .sub { margin-top: 10px; font-size: 14px; color: var(--muted); }
+    .token { margin-top: 8px; font-size: 15px; color: #7CFC00; word-break: break-all; }
+    .time { margin-top: 2px; font-size: 14px; color: #d7d9de; }
 
-    .status {{ margin-top: 12px; font-size: 13px; color: var(--muted); }}
-    .status.ok {{ color: #00d68f; }}
-    .status.err {{ color: var(--danger); }}
+    .status { margin-top: 12px; font-size: 13px; color: var(--muted); }
+    .status.ok { color: #00d68f; }
+    .status.err { color: #ff4d4f; }
 
-    .actions {{ margin-top: 12px; }}
-    .actions a {{ background:#21242a; color:#fff; border:1px solid #2a2e35; padding:8px 12px; border-radius:12px; text-decoration:none; display:inline-block; }}
+    .actions { margin-top: 12px; }
+    .actions a { background:#21242a; color:#fff; border:1px solid #2a2e35; padding:8px 12px; border-radius:12px; text-decoration:none; display:inline-block; }
 
-    footer {{ text-align:center; color:#8b90a0; font-size:12px; margin: 18px 0 28px; }}
+    footer { text-align:center; color:#8b90a0; font-size:12px; margin: 18px 0 28px; }
 
-    @media (max-width: 420px){{
-      header h1 {{ font-size: 16px; }}
-    }}
+    @media (max-width: 420px){ header h1 { font-size: 16px; } }
   </style>
 </head>
 <body>
@@ -58,16 +56,23 @@
   </main>
 
 <script>
-(() => {{
+(() => {
+  // === LOGIN GUARD (cluster) ===
+  const REQUIRED_AUTH = "7qvt6";
+  const clusterKey = sessionStorage.getItem('clusterKey') || localStorage.getItem('clusterKey') || sessionStorage.getItem('loginQR');
+  if (!clusterKey || clusterKey !== REQUIRED_AUTH) {
+    alert("🔒 Akses ditolak. Silakan login dahulu.");
+    location.href = "login.html";
+    return;
+  }
+
   // === KONFIG ===
-  const AREA = "PBL"; // Area ditetapkan fix
+  const AREA = "PBL"; // fixed
   const GAS_URL = "https://script.google.com/macros/s/AKfycbzjYLOPjkm8GvbxCgLFbysK16n1nh6YRTgmKFn7oQTGfNSS9t85JkXwfoAXEHkHbEvVXg/exec";
   const BOT_DEEPLINK_BASE = "https://t.me/absensi_qr_bot?start=";
   const INTERVAL_MS = 2000;
   const FETCH_TIMEOUT = 8000;
   const QR_MAX = 420, QR_MIN = 220;
-
-  // === TIDAK ADA LOGIN GUARD DI VERSI INI ===
 
   const elQR = document.getElementById('qr');
   const elToken = document.getElementById('tokenDisplay');
@@ -76,15 +81,15 @@
   const elRefreshSec = document.getElementById('refreshSec');
   elRefreshSec.textContent = (INTERVAL_MS/1000).toString();
 
-  function computeQRSize(){{
+  function computeQRSize(){
     const vw = Math.min(window.innerWidth, 760) - 64;
     return Math.max(QR_MIN, Math.min(QR_MAX, Math.floor(vw)));
-  }}
-  function resizeQR(){{
+  }
+  function resizeQR(){
     const s = computeQRSize();
-    qr.set({{ size: s }});
-  }}
-  const qr = new QRious({{ element: elQR, value: 'Memuat…', size: computeQRSize(), level: 'H', background: '#ffffff', foreground: '#000000' }});
+    qr.set({ size: s });
+  }
+  const qr = new QRious({ element: elQR, value: 'Memuat…', size: computeQRSize(), level: 'H', background: '#ffffff', foreground: '#000000' });
   window.addEventListener('resize', resizeQR);
 
   let lastToken = '';
@@ -92,81 +97,81 @@
   let timer = null;
   let backoff = 0;
 
-  function setStatus(msg, ok=false, err=false){{
+  function setStatus(msg, ok=false, err=false){
     elStatus.textContent = msg;
     elStatus.classList.toggle('ok', ok);
     elStatus.classList.toggle('err', err);
-  }}
-  function fmtNow(){{
+  }
+  function fmtNow(){
     const now = new Date();
-    const opts = {{ weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }};
+    const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     elTime.textContent = now.toLocaleDateString('id-ID', opts) + ' • ' + now.toLocaleTimeString('id-ID');
-  }}
+  }
   setInterval(fmtNow, 1000); fmtNow();
 
-  function buildLink(token){{
-    return BOT_DEEPLINK_BASE + encodeURIComponent(`${{token}}_${PBL}`);
-  }}
+  function buildLink(token){
+    return BOT_DEEPLINK_BASE + encodeURIComponent(token + "_" + AREA);
+  }
 
-  async function fetchWithTimeout(url, ms){{
+  async function fetchWithTimeout(url, ms){
     const ctrl = new AbortController();
     const id = setTimeout(() => ctrl.abort(), ms);
-    try {{
-      const res = await fetch(url, {{ cache:'no-store', signal: ctrl.signal }});
+    try {
+      const res = await fetch(url, { cache:'no-store', signal: ctrl.signal });
       return res;
-    }} finally {{ clearTimeout(id); }}
-  }}
+    } finally { clearTimeout(id); }
+  }
 
-  async function fetchToken(){{
-    const url = `${{GAS_URL}}?action=getToken&area=${{encodeURIComponent(AREA)}}&t=${{Date.now()}}`;
-    try {{
+  async function fetchToken(){
+    const url = `${GAS_URL}?action=getToken&area=${encodeURIComponent(AREA)}&t=${Date.now()}`;
+    try {
       setStatus('Mengambil token…');
       const res = await fetchWithTimeout(url, FETCH_TIMEOUT);
-      if (!res.ok) throw new Error(`HTTP ${{res.status}}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       if (!data || !data.token) throw new Error('Format respons tidak valid');
 
       const tokenNow = String(data.token);
       elToken.textContent = 'Token: ' + tokenNow;
 
-      if (tokenNow !== lastToken){{
+      if (tokenNow !== lastToken){
         lastToken = tokenNow;
         lastLink = buildLink(tokenNow);
         qr.value = lastLink;
-      }}
+      }
 
       setStatus('Tersambung', true, false);
       backoff = 0;
-    }} catch (err){{
+    } catch (err){
       console.error('fetchToken error:', err);
       const msg = (err && err.name === 'AbortError') ? 'Timeout mengambil token' : (err && err.message ? err.message : String(err));
       setStatus('Gagal: ' + msg, false, true);
-      if (!lastToken) {{
+      if (!lastToken) {
         qr.value = 'Token belum tersedia';
-      }}
-    }}
-  }}
+      }
+    }
+  }
 
-  function startPolling(){{
+  function startPolling(){
     stopPolling();
-    const tick = async () => {{
+    const tick = async () => {
       await fetchToken();
       const base = INTERVAL_MS;
       const delay = base * (backoff ? Math.min(4, 2 ** backoff) : 1);
       timer = setTimeout(tick, delay);
       if (elStatus.classList.contains('err')) backoff = Math.min(backoff + 1, 4); else backoff = 0;
-    }};
+    };
     timer = setTimeout(tick, 0);
-  }}
-  function stopPolling(){{ if (timer) {{ clearTimeout(timer); timer = null; }} }}
+  }
+  function stopPolling(){ if (timer) { clearTimeout(timer); timer = null; } }
 
-  document.addEventListener('visibilitychange', () => {{
-    if (document.hidden) {{ stopPolling(); }}
-    else {{ startPolling(); fetchToken(); }}
-  }});
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) { stopPolling(); }
+    else { startPolling(); fetchToken(); }
+  });
 
   startPolling();
-}})();
+})();
 </script>
 </body>
 </html>
