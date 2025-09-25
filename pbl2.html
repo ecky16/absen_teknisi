@@ -31,20 +31,6 @@
   </style>
 </head>
 <body>
-
-<script>
-  const REQUIRED_AUTH = "7qvt6";
-  const cluster = sessionStorage.getItem('clusterKey');
-  if (!cluster || cluster !== REQUIRED_AUTH) {
-    alert("🔒 Akses ditolak. Silakan login dahulu.");
-    window.location.href = "login.html";
-  } else {
-    if (window.location.search.length > 0) {
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-  }
-</script>
-
 <header><h1>📸 QR Absen Area PBL2</h1></header>
 
 <div id="qrcode" class="qr-wrap"><canvas id="qr"></canvas></div>
@@ -55,21 +41,32 @@
   <button class="btn" onclick="fetchToken()">↻ Refresh QR</button>
   <a class="btn" href="login.html">Ganti Area</a>
 </div>
+  
+<script>
+  const REQUIRED_AUTH = "7qvt6";
+  const cluster = sessionStorage.getItem('clusterKey');
+  if (!cluster || cluster !== REQUIRED_AUTH) {
+    alert("🔒 Akses ditolak. Silakan login dahulu.");
+    location.href = "login.html";
+  } else if (location.search) {
+    history.replaceState({}, document.title, location.pathname);
+  }
+</script>
 
 <script>
   const GAS_URL = "https://script.google.com/macros/s/AKfycbzjYLOPjkm8GvbxCgLFbysK16n1nh6YRTgmKFn7oQTGfNSS9t85JkXwfoAXEHkHbEvVXg/exec";
   const AREA = "PBL2";
   const BOT_DEEPLINK_BASE = "https://t.me/absensi_qr_bot?start=";
 
+  // Inisialisasi QRious (kanvas sudah ada di atas, aman)
   const qr = new QRious({
-  element: document.getElementById('qr'),
-  value: 'Memuat...',
-  size: 360,          // dari 320 -> 360
-  level: 'H',         // koreksi tinggi
-  background: '#ffffff',
-  foreground: '#000000'
-});
-
+    element: document.getElementById('qr'),
+    value: 'Memuat...',
+    size: 360,
+    level: 'H',
+    background: '#ffffff',
+    foreground: '#000000'
+  });
 
   let lastToken = "";
   let lastTimestamp = "";
@@ -77,9 +74,8 @@
   async function fetchToken() {
     const url = `${GAS_URL}?action=getToken&area=${encodeURIComponent(AREA)}&t=${Date.now()}`;
     try {
-      // timeout biar gak ngegantung
       const ctrl = new AbortController();
-      const to = setTimeout(() => ctrl.abort(), 8000);
+      const to = setTimeout(() => ctrl.abort(), 8000); // timeout 8s
 
       const res = await fetch(url, { cache: 'no-store', signal: ctrl.signal });
       clearTimeout(to);
@@ -90,55 +86,53 @@
 
       const tokenNow = String(data.token);
 
-      // bersihkan status error kalau sukses
+      // simpan teks lama, lalu tulis teks baru
       const el = document.getElementById('tokenDisplay');
-const prevText = el.textContent;                 // <-- simpan teks lama
-el.textContent = "Token Saat Ini: " + tokenNow;  // tulis yang baru
-const wasError = /Error/i.test(prevText);        // <-- cek SEBELUM ditimpa
+      const prevText = el.textContent;
+      el.textContent = "Token Saat Ini: " + tokenNow;
 
-if (tokenNow !== lastToken || wasError) {
-  const qrValue = `${BOT_DEEPLINK_BASE}${encodeURIComponent(tokenNow + '_' + AREA)}`;
-  qr.value = qrValue;
-  lastToken = tokenNow;
-}
-
-
-      // set QR kalau token berubah ATAU sebelumnya sempat error
-      const wasError = /Error/i.test(document.getElementById('tokenDisplay').textContent);
+      // perbarui QR jika token berubah atau sebelumnya sempat error
+      const wasError = /Error/i.test(prevText);
       if (tokenNow !== lastToken || wasError) {
-        const qrValue = `${BOT_DEEPLINK_BASE}${encodeURIComponent(tokenNow + '_' + AREA)}`;
-        qr.value = qrValue;
+        const link = `${BOT_DEEPLINK_BASE}${encodeURIComponent(tokenNow + '_' + AREA)}`;
+        qr.value = link;
         lastToken = tokenNow;
       }
 
       if (data.timestamp != null) lastTimestamp = data.timestamp;
     } catch (e) {
       console.error('fetchToken error:', e);
-      // tampilkan error sementara — panggilan berikutnya akan menimpa
       document.getElementById('tokenDisplay').textContent = "Token Error";
-      qr.value = '❌ Gagal ambil token';
+      // biarkan QR terakhir tetap tampil
     }
   }
 
-  // Saat tab kembali aktif dari background, refresh sekali
+  // Refresh saat tab kembali aktif
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) fetchToken();
   });
 
-
   function updateTime() {
     const now = new Date();
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    const tanggal = now.toLocaleDateString('id-ID', options);
-    const jam = now.toLocaleTimeString('id-ID');
-    document.getElementById('waktu').textContent = tanggal + " - " + jam;
+    document.getElementById('waktu').textContent =
+      now.toLocaleDateString('id-ID', options) + " - " + now.toLocaleTimeString('id-ID');
   }
+
+  // Logout rapi (lebih aman daripada <a href>)
+  function logout(){
+    sessionStorage.removeItem('loginQR');
+    sessionStorage.removeItem('clusterKey');
+    location.href = "login.html";
+  }
+  window.logout = logout; // buat dipanggil dari tombol
 
   setInterval(fetchToken, 2000);
   setInterval(updateTime, 1000);
   fetchToken();
   updateTime();
 </script>
+
 
 <footer style="margin-top:18px;color:#888;font-size:12px">SAPA QR v.2.0 - 2025</footer>
 </body>
