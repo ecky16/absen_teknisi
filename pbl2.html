@@ -1,139 +1,217 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QR Absen PBL2</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QR Absen PBL2 — v2.4</title>
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
   <style>
- body { font-family: system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif; text-align: center; background-color: #111; color: #fff; margin:0; padding: 20px; }
-  header { background:#b40000; padding:16px; margin:-20px -20px 20px; }
-  header h1 { font-size:20px; margin:0; }
-  #qrcode { margin: 20px auto; }
-  #waktu { font-size: 1.2em; margin-top: 10px; color:#ddd; }
-  #tokenDisplay { margin-top:10px; font-size:1.05em; color:#7CFC00; }
-  .note { color:#bbb; font-size:.9em; margin-top:8px; }
-  .bar { display:flex; gap:8px; justify-content:center; margin-top:12px; flex-wrap:wrap; }
-  .btn { background:#2a2a2a; color:#fff; border:none; padding:10px 12px; border-radius:10px; cursor:pointer; }
-  a.btn { text-decoration:none; }
+    :root {
+      --bg: #0d0d0f;
+      --card: #17171b;
+      --text: #f5f7fb;
+      --muted: #aab0bd;
+      --accent: #00d68f;
+      --danger: #ff4d4f;
+      --brand: #b40000;
+    }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif; color: var(--text); background: var(--bg); }
+    header { background: var(--brand); padding: 16px; text-align: center; position: sticky; top: 0; z-index: 2; }
+    header h1 { margin:0; font-size: 18px; letter-spacing:.2px }
 
-  /* === Tambahan baru untuk QR === */
-  .qr-wrap{
-    display:inline-block;
-    background:#fff;       /* bingkai putih (quiet zone) */
-    padding:16px;          /* 16–20px ideal */
-    border-radius:8px;     /* opsional */
-    box-shadow:0 0 0 1px #fff; /* pastikan tepi terang */
-  }
-  #qr{
-    image-rendering: pixelated; /* biar modul QR tetap tajam */
-  }
+    main { max-width: 760px; margin: 18px auto; padding: 0 16px; }
+    .board { background: var(--card); border: 1px solid #22252b; border-radius: 14px; padding: 18px; text-align: center; box-shadow: 0 8px 24px rgb(0 0 0 / .25); }
+
+    .qr-wrap { display: inline-block; background: #fff; padding: 18px; border-radius: 10px; box-shadow: 0 0 0 1px #fff; }
+    canvas#qr { display:block; image-rendering: pixelated; }
+
+    .sub { margin-top: 10px; font-size: 14px; color: var(--muted); }
+    .token { margin-top: 8px; font-size: 15px; color: #7CFC00; word-break: break-all; }
+    .time { margin-top: 2px; font-size: 14px; color: #d7d9de; }
+
+    .bar { display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-top: 14px; }
+    .btn { background:#21242a; color:#fff; border:1px solid #2a2e35; padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:600; }
+    .btn[disabled] { opacity: .6; cursor: not-allowed; }
+    a.btn { text-decoration:none; display:inline-flex; align-items:center; gap:8px; }
+
+    .status { margin-top: 12px; font-size: 13px; color: var(--muted); }
+    .status.ok { color: var(--accent); }
+    .status.err { color: var(--danger); }
+
+    footer { text-align:center; color:#8b90a0; font-size:12px; margin: 18px 0 28px; }
+
+    @media (max-width: 420px){
+      header h1 { font-size: 16px; }
+    }
   </style>
 </head>
 <body>
-<header><h1>📸 QR Absen Area PBL2</h1></header>
-
-<div id="qrcode" class="qr-wrap"><canvas id="qr"></canvas></div>
-<div id="waktu"></div>
-<div id="tokenDisplay"></div>
-<div class="note">Auto-refresh setiap 2 detik (real-time saat ramai).</div>
-<div class="bar">
-  <button class="btn" onclick="fetchToken()">↻ Refresh QR</button>
-  <a class="btn" href="login.html">Ganti Area</a>
-</div>
-  
-<script>
-  const REQUIRED_AUTH = "7qvt6";
-  const cluster = sessionStorage.getItem('clusterKey');
-  if (!cluster || cluster !== REQUIRED_AUTH) {
-    alert("🔒 Akses ditolak. Silakan login dahulu.");
-    location.href = "login.html";
-  } else if (location.search) {
-    history.replaceState({}, document.title, location.pathname);
-  }
-</script>
+  <header><h1>📸 QR Absen — Area <span id="areaLabel">PBL2</span></h1></header>
+  <main>
+    <section class="board">
+      <div class="qr-wrap"><canvas id="qr" width="360" height="360" aria-label="Kode QR"></canvas></div>
+      <div class="sub" id="note">Auto-refresh setiap <b><span id="refreshSec">2</span>s</b>.</div>
+      <div class="token" id="tokenDisplay">Memuat token…</div>
+      <div class="time" id="waktu">—</div>
+      <div class="bar">
+        <button class="btn" id="btnRefresh">↻ Refresh QR</button>
+        <button class="btn" id="btnCopy">🔗 Salin tautan</button>
+        <a class="btn" id="btnOpen" href="#" target="_blank" rel="noopener">▶️ Buka di Telegram</a>
+        <a class="btn" href="login.html">Ganti Area</a>
+      </div>
+      <div class="status" id="status">Siap.</div>
+    </section>
+    <footer>SAPA QR v2.4 • 2025</footer>
+  </main>
 
 <script>
+(() => {
+  // === KONFIG ===
+  const DEFAULT_AREA = "PBL2";
   const GAS_URL = "https://script.google.com/macros/s/AKfycbzjYLOPjkm8GvbxCgLFbysK16n1nh6YRTgmKFn7oQTGfNSS9t85JkXwfoAXEHkHbEvVXg/exec";
-  const AREA = "PBL2";
   const BOT_DEEPLINK_BASE = "https://t.me/absensi_qr_bot?start=";
+  const REQUIRED_AUTH = "7qvt6";                 // kunci cluster saat ini
+  const INTERVAL_MS = 2000;                       // auto refresh token
+  const FETCH_TIMEOUT = 8000;                     // 8 detik
+  const QR_MAX = 420, QR_MIN = 220;               // batas ukuran QR responsif
 
-  // Inisialisasi QRious (kanvas sudah ada di atas, aman)
-  const qr = new QRious({
-    element: document.getElementById('qr'),
-    value: 'Memuat...',
-    size: 360,
-    level: 'H',
-    background: '#ffffff',
-    foreground: '#000000'
-  });
+  // === GUARD LOGIN (kompatibel key lama) ===
+  const clusterKey = sessionStorage.getItem('clusterKey')
+    || localStorage.getItem('clusterKey')
+    || sessionStorage.getItem('loginQR');
+  if (!clusterKey || clusterKey !== REQUIRED_AUTH) {
+    alert('🔒 Akses ditolak. Silakan login dahulu.');
+    location.href = 'login.html';
+  }
 
-  let lastToken = "";
-  let lastTimestamp = "";
+  // === AREA dari query ?area=... (opsional) ===
+  const params = new URLSearchParams(location.search);
+  const AREA = (params.get('area') || DEFAULT_AREA).trim().toUpperCase();
+  document.getElementById('areaLabel').textContent = AREA;
+  // Bersihkan query agar tidak duplikasi history
+  if (location.search) history.replaceState({}, document.title, location.pathname);
 
-  async function fetchToken() {
+  // === Elemen ===
+  const elQR = document.getElementById('qr');
+  const elToken = document.getElementById('tokenDisplay');
+  const elTime = document.getElementById('waktu');
+  const elStatus = document.getElementById('status');
+  const elBtnRefresh = document.getElementById('btnRefresh');
+  const elBtnCopy = document.getElementById('btnCopy');
+  const elBtnOpen = document.getElementById('btnOpen');
+  const elRefreshSec = document.getElementById('refreshSec');
+  elRefreshSec.textContent = (INTERVAL_MS/1000).toString();
+
+  // === QR init (ukuran responsif) ===
+  function computeQRSize(){
+    const vw = Math.min(window.innerWidth, 760) - 64; // padding board
+    return Math.max(QR_MIN, Math.min(QR_MAX, Math.floor(vw)));
+  }
+  function resizeQR(){
+    const s = computeQRSize();
+    qr.set({ size: s });
+  }
+  const qr = new QRious({ element: elQR, value: 'Memuat…', size: computeQRSize(), level: 'H', background: '#ffffff', foreground: '#000000' });
+  window.addEventListener('resize', resizeQR);
+
+  // === State ===
+  let lastToken = '';
+  let lastLink = '';
+  let timer = null;
+  let backoff = 0; // 0,1,2,3… (exponential)
+
+  // === Util ===
+  function setStatus(msg, ok=false, err=false){
+    elStatus.textContent = msg;
+    elStatus.classList.toggle('ok', ok);
+    elStatus.classList.toggle('err', err);
+  }
+  function fmtNow(){
+    const now = new Date();
+    const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    elTime.textContent = now.toLocaleDateString('id-ID', opts) + ' • ' + now.toLocaleTimeString('id-ID');
+  }
+  setInterval(fmtNow, 1000); fmtNow();
+
+  function buildLink(token){
+    return BOT_DEEPLINK_BASE + encodeURIComponent(`${token}_${AREA}`);
+  }
+
+  async function fetchWithTimeout(url, ms){
+    const ctrl = new AbortController();
+    const id = setTimeout(() => ctrl.abort(), ms);
+    try {
+      const res = await fetch(url, { cache:'no-store', signal: ctrl.signal });
+      return res;
+    } finally { clearTimeout(id); }
+  }
+
+  async function fetchToken(){
     const url = `${GAS_URL}?action=getToken&area=${encodeURIComponent(AREA)}&t=${Date.now()}`;
     try {
-      const ctrl = new AbortController();
-      const to = setTimeout(() => ctrl.abort(), 8000); // timeout 8s
-
-      const res = await fetch(url, { cache: 'no-store', signal: ctrl.signal });
-      clearTimeout(to);
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-
+      setStatus('Mengambil token…');
+      const res = await fetchWithTimeout(url, FETCH_TIMEOUT);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      if (!data || !data.token) throw new Error('Token kosong / format salah');
+      if (!data || !data.token) throw new Error('Format respons tidak valid');
 
       const tokenNow = String(data.token);
+      elToken.textContent = 'Token: ' + tokenNow;
 
-      // simpan teks lama, lalu tulis teks baru
-      const el = document.getElementById('tokenDisplay');
-      const prevText = el.textContent;
-      el.textContent = "Token Saat Ini: " + tokenNow;
-
-      // perbarui QR jika token berubah atau sebelumnya sempat error
-      const wasError = /Error/i.test(prevText);
-      if (tokenNow !== lastToken || wasError) {
-        const link = `${BOT_DEEPLINK_BASE}${encodeURIComponent(tokenNow + '_' + AREA)}`;
-        qr.value = link;
+      if (tokenNow !== lastToken){
         lastToken = tokenNow;
+        lastLink = buildLink(tokenNow);
+        qr.value = lastLink;
+        elBtnOpen.href = lastLink;
       }
 
-      if (data.timestamp != null) lastTimestamp = data.timestamp;
-    } catch (e) {
-      console.error('fetchToken error:', e);
-      document.getElementById('tokenDisplay').textContent = "Token Error";
-      // biarkan QR terakhir tetap tampil
+      setStatus('Tersambung', true, false);
+      backoff = 0; // reset backoff jika sukses
+    } catch (err){
+      console.error('fetchToken error:', err);
+      const msg = (err && err.name === 'AbortError') ? 'Timeout mengambil token' : (err && err.message ? err.message : String(err));
+      setStatus('Gagal: ' + msg, false, true);
+      if (!lastToken) {
+        qr.value = 'Token belum tersedia';
+      }
     }
   }
 
-  // Refresh saat tab kembali aktif
+  // === Interval w/ backoff eksponensial saat error ===
+  function startPolling(){
+    stopPolling();
+    const tick = async () => {
+      await fetchToken();
+      const base = INTERVAL_MS;
+      const delay = base * (backoff ? Math.min(4, 2 ** backoff) : 1); // 2x,4x,8x, max 16x
+      timer = setTimeout(tick, delay);
+      // naikan backoff hanya jika status adalah error
+      if (elStatus.classList.contains('err')) backoff = Math.min(backoff + 1, 4); else backoff = 0;
+    };
+    timer = setTimeout(tick, 0);
+  }
+  function stopPolling(){ if (timer) { clearTimeout(timer); timer = null; } }
+
+  // === Visibility: hentikan saat tab tersembunyi ===
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) fetchToken();
+    if (document.hidden) { stopPolling(); }
+    else { startPolling(); fetchToken(); }
   });
 
-  function updateTime() {
-    const now = new Date();
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    document.getElementById('waktu').textContent =
-      now.toLocaleDateString('id-ID', options) + " - " + now.toLocaleTimeString('id-ID');
-  }
+  // === Tombol ===
+  elBtnRefresh.addEventListener('click', () => { backoff = 0; fetchToken(); });
+  elBtnCopy.addEventListener('click', async () => {
+    try {
+      if (!lastLink) { lastLink = qr.value; }
+      await navigator.clipboard.writeText(String(lastLink || ''));
+      setStatus('Tautan disalin ✔', true, false);
+    } catch (e){ setStatus('Gagal menyalin tautan', false, true); }
+  });
 
-  // Logout rapi (lebih aman daripada <a href>)
-  function logout(){
-    sessionStorage.removeItem('loginQR');
-    sessionStorage.removeItem('clusterKey');
-    location.href = "login.html";
-  }
-  window.logout = logout; // buat dipanggil dari tombol
-
-  setInterval(fetchToken, 2000);
-  setInterval(updateTime, 1000);
-  fetchToken();
-  updateTime();
+  // Mulai
+  startPolling();
+})();
 </script>
-
-
-<footer style="margin-top:18px;color:#888;font-size:12px">SAPA QR v.2.0 - 2025</footer>
 </body>
 </html>
