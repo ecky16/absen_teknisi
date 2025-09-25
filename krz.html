@@ -74,6 +74,30 @@
   const FETCH_TIMEOUT = 8000;
   const QR_MAX = 420, QR_MIN = 220;
 
+  // === Profil interval siang/malam + jitter ===
+// Jam siang: 06:00 s.d. 21:59 (bisa kamu ubah)
+const DAY_START = 6;
+const DAY_END   = 22;
+
+// Interval dasar
+const INTERVAL_DAY_MS   = 2000; // 2s saat siang
+const INTERVAL_NIGHT_MS = 8000; // 8s saat malam (boleh 10000 kalau mau 10s)
+
+// Jitter untuk desinkronisasi antar layar (0–500 ms)
+const JITTER_MS = 500;
+
+function isNight() {
+  const h = new Date().getHours();
+  return !(h >= DAY_START && h < DAY_END);
+}
+function withJitter(base) {
+  return base + Math.floor(Math.random() * JITTER_MS);
+}
+function currentBaseInterval() {
+  return isNight() ? INTERVAL_NIGHT_MS : INTERVAL_DAY_MS;
+}
+
+
   const elQR = document.getElementById('qr');
   const elToken = document.getElementById('tokenDisplay');
   const elTime = document.getElementById('waktu');
@@ -152,17 +176,27 @@
     }
   }
 
-  function startPolling(){
-    stopPolling();
-    const tick = async () => {
-      await fetchToken();
-      const base = INTERVAL_MS;
-      const delay = base * (backoff ? Math.min(4, 2 ** backoff) : 1);
-      if (elStatus.classList.contains('err')) backoff = Math.min(backoff + 1, 4); else backoff = 0;
-      timer = setTimeout(tick, delay);
-    };
-    timer = setTimeout(tick, 0);
-  }
+function startPolling(){
+  stopPolling();
+  const tick = async () => {
+    await fetchToken();
+
+    // hitung base interval (siang/malam) + backoff + jitter
+    const base = currentBaseInterval();
+    const backoffMul = elStatus.classList.contains('err') ? Math.min(16, 2 ** backoff) : 1; // 1,2,4,8,16
+    const delay = withJitter(base * backoffMul);
+
+    // naikkan backoff hanya saat error; reset kalau sukses
+    if (elStatus.classList.contains('err')) backoff = Math.min(backoff + 1, 4);
+    else backoff = 0;
+
+    timer = setTimeout(tick, delay);
+  };
+
+  // startup delay: sedikit jitter supaya tidak bareng dengan device lain
+  timer = setTimeout(tick, withJitter(200));
+}
+
   function stopPolling(){ if (timer) { clearTimeout(timer); timer = null; } }
 
   document.addEventListener('visibilitychange', () => {
