@@ -74,6 +74,29 @@
   const FETCH_TIMEOUT = 8000;
   const QR_MAX = 420, QR_MIN = 220;
 
+  // === Profil interval siang/malam + jitter ===
+// Jam siang: 06:00 s.d. 21:59 (bisa kamu ubah)
+const DAY_START = 6;
+const DAY_END   = 22;
+
+// Interval dasar
+const INTERVAL_DAY_MS   = 2000; // 2s saat siang
+const INTERVAL_NIGHT_MS = 8000; // 8s saat malam (boleh 10000 kalau mau 10s)
+
+// Jitter untuk desinkronisasi antar layar (0–500 ms)
+const JITTER_MS = 500;
+
+function isNight() {
+  const h = new Date().getHours();
+  return !(h >= DAY_START && h < DAY_END);
+}
+function withJitter(base) {
+  return base + Math.floor(Math.random() * JITTER_MS);
+}
+function currentBaseInterval() {
+  return isNight() ? INTERVAL_NIGHT_MS : INTERVAL_DAY_MS;
+}
+
   const elQR = document.getElementById('qr');
   const elToken = document.getElementById('tokenDisplay');
   const elTime = document.getElementById('waktu');
