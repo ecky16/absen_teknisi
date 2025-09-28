@@ -50,7 +50,7 @@
       <div class="token" id="tokenDisplay">Memuat token…</div>
       <div class="time" id="waktu">—</div>
       <div class="status" id="status">Siap.</div>
-      <div class="actions"><a href="login.html">Ganti Area</a></div>
+      <div class="actions"><a href="index.html">Ganti Area</a></div>
     </section>
     <footer>SAPA QR v2.6 • 2025</footer>
   </main>
@@ -62,7 +62,7 @@
   const clusterKey = sessionStorage.getItem('clusterKey') || localStorage.getItem('clusterKey') || sessionStorage.getItem('loginQR');
   if (!clusterKey || clusterKey !== REQUIRED_AUTH) {
     alert("🔒 Akses ditolak. Silakan login dahulu.");
-    location.href = "login.html";
+    location.href = "index.html";
     return;
   }
 
