@@ -56,23 +56,25 @@
   </main>
 
 <script>
+<script>
 (() => {
-  // === LOGIN GUARD (cluster) ===
-  const REQUIRED_AUTH = "xvk98";
-  const clusterKey = sessionStorage.getItem('clusterKey') || localStorage.getItem('clusterKey') || sessionStorage.getItem('loginQR');
-  if (!clusterKey || clusterKey !== REQUIRED_AUTH) {
-    alert("🔒 Akses ditolak. Silakan login dahulu.");
+  // === ✅ LOGIN GUARD TERBARU (Sesuai Sistem OTP) ===
+  // Cukup cek apakah status loginQR bernilai "true"
+  const isAuthorized = sessionStorage.getItem('loginQR') === 'true';
+  
+  if (!isAuthorized) {
+    alert("🔒 Akses ditolak. Silakan login menggunakan password dari Bot Telegram.");
     location.href = "index.html";
     return;
   }
 
   // === KONFIG ===
-  const AREA = "JEMBER"; // fixed
+  const AREA = "JEMBER"; // Sesuaikan dengan nama area di masing-masing file
+  // URL GAS untuk ambil Token QR (pastikan tetap pakai URL GAS Mas Ecky yang lama)
   const GAS_URL = "https://script.google.com/macros/s/AKfycbzjYLOPjkm8GvbxCgLFbysK16n1nh6YRTgmKFn7oQTGfNSS9t85JkXwfoAXEHkHbEvVXg/exec";
   const BOT_DEEPLINK_BASE = "https://t.me/absensi_qr_bot?start=";
-  const INTERVAL_MS = 2000;
-  const FETCH_TIMEOUT = 8000;
-  const QR_MAX = 420, QR_MIN = 220;
+  
+  // ... sisa kode fetchToken, startPolling, dll ke bawah tetap sama, jangan ada yang dihapus ...
 
   // === Profil interval siang/malam + jitter ===
 // Jam siang: 06:00 s.d. 21:59 (bisa kamu ubah)
