@@ -57,46 +57,38 @@
 
 <script>
 (() => {
-  // === LOGIN GUARD (cluster) ===
-  const REQUIRED_AUTH = "7qvt6";
-  const clusterKey = sessionStorage.getItem('clusterKey') || localStorage.getItem('clusterKey') || sessionStorage.getItem('loginQR');
-  if (!clusterKey || clusterKey !== REQUIRED_AUTH) {
+  // === ✅ LOGIN GUARD TERBARU ===
+  const isAuthorized = sessionStorage.getItem('loginQR') === 'true';
+  if (!isAuthorized) {
     alert("🔒 Akses ditolak. Silakan login dahulu.");
     location.href = "index.html";
     return;
   }
 
   // === KONFIG ===
-  const AREA = "PBL2"; // fixed
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbzjYLOPjkm8GvbxCgLFbysK16n1nh6YRTgmKFn7oQTGfNSS9t85JkXwfoAXEHkHbEvVXg/exec";
+  const AREA = "PBL2"; 
+  const GAS_URL = "https://script.google.com/macros/s/AKfycbzH7Mzki5gHcjasHIAHluJ-YbM6SdbOgI76Q-3kM2qPeZcDAVyDYB2N4uH3Uds3VJ83/exec";
   const BOT_DEEPLINK_BASE = "https://t.me/absensi_qr_bot?start=";
   const INTERVAL_MS = 2000;
   const FETCH_TIMEOUT = 8000;
   const QR_MAX = 420, QR_MIN = 220;
 
-  // === Profil interval siang/malam + jitter ===
-// Jam siang: 06:00 s.d. 21:59 (bisa kamu ubah)
-const DAY_START = 6;
-const DAY_END   = 22;
+  const DAY_START = 6;
+  const DAY_END = 22;
+  const INTERVAL_DAY_MS = 2000;
+  const INTERVAL_NIGHT_MS = 8000;
+  const JITTER_MS = 500;
 
-// Interval dasar
-const INTERVAL_DAY_MS   = 2000; // 2s saat siang
-const INTERVAL_NIGHT_MS = 8000; // 8s saat malam (boleh 10000 kalau mau 10s)
-
-// Jitter untuk desinkronisasi antar layar (0–500 ms)
-const JITTER_MS = 500;
-
-function isNight() {
-  const h = new Date().getHours();
-  return !(h >= DAY_START && h < DAY_END);
-}
-function withJitter(base) {
-  return base + Math.floor(Math.random() * JITTER_MS);
-}
-function currentBaseInterval() {
-  return isNight() ? INTERVAL_NIGHT_MS : INTERVAL_DAY_MS;
-}
-
+  function isNight() {
+    const h = new Date().getHours();
+    return !(h >= DAY_START && h < DAY_END);
+  }
+  function withJitter(base) {
+    return base + Math.floor(Math.random() * JITTER_MS);
+  }
+  function currentBaseInterval() {
+    return isNight() ? INTERVAL_NIGHT_MS : INTERVAL_DAY_MS;
+  }
 
   const elQR = document.getElementById('qr');
   const elToken = document.getElementById('tokenDisplay');
@@ -117,7 +109,6 @@ function currentBaseInterval() {
   window.addEventListener('resize', resizeQR);
 
   let lastToken = '';
-  let lastLink = '';
   let timer = null;
   let backoff = 0;
 
@@ -133,16 +124,11 @@ function currentBaseInterval() {
   }
   setInterval(fmtNow, 1000); fmtNow();
 
-  function buildLink(token){
-    return BOT_DEEPLINK_BASE + encodeURIComponent(token + "_" + AREA);
-  }
-
   async function fetchWithTimeout(url, ms){
     const ctrl = new AbortController();
     const id = setTimeout(() => ctrl.abort(), ms);
     try {
-      const res = await fetch(url, { cache:'no-store', signal: ctrl.signal });
-      return res;
+      return await fetch(url, { cache:'no-store', signal: ctrl.signal });
     } finally { clearTimeout(id); }
   }
 
@@ -151,56 +137,39 @@ function currentBaseInterval() {
     try {
       setStatus('Mengambil token…');
       const res = await fetchWithTimeout(url, FETCH_TIMEOUT);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      if (!data || !data.token) throw new Error('Format respons tidak valid');
-
-      const tokenNow = String(data.token);
-      elToken.textContent = 'Token: ' + tokenNow;
-
-      if (tokenNow !== lastToken){
-        lastToken = tokenNow;
-        lastLink = buildLink(tokenNow);
-        qr.value = lastLink;
+      
+      if (data && data.token) {
+        const tokenNow = String(data.token);
+        elToken.textContent = 'Token: ' + tokenNow;
+        if (tokenNow !== lastToken){
+          lastToken = tokenNow;
+          qr.value = BOT_DEEPLINK_BASE + encodeURIComponent(tokenNow + "_" + AREA);
+        }
+        setStatus('Tersambung', true, false);
+        backoff = 0;
+      } else {
+        throw new Error(data.message || 'Token tidak ditemukan');
       }
-
-      setStatus('Tersambung', true, false);
-      backoff = 0;
     } catch (err){
-      console.error('fetchToken error:', err);
-      const msg = (err && err.name === 'AbortError') ? 'Timeout mengambil token' : (err && err.message ? err.message : String(err));
-      setStatus('Gagal: ' + msg, false, true);
-      if (!lastToken) {
-        qr.value = 'Token belum tersedia';
-      }
+      setStatus('Gagal: ' + err.message, false, true);
     }
   }
 
-function startPolling(){
-  stopPolling();
-  const tick = async () => {
-    await fetchToken();
-
-    // hitung base interval (siang/malam) + backoff + jitter
-    const base = currentBaseInterval();
-    const backoffMul = elStatus.classList.contains('err') ? Math.min(16, 2 ** backoff) : 1; // 1,2,4,8,16
-    const delay = withJitter(base * backoffMul);
-
-    // naikkan backoff hanya saat error; reset kalau sukses
-    if (elStatus.classList.contains('err')) backoff = Math.min(backoff + 1, 4);
-    else backoff = 0;
-
-    timer = setTimeout(tick, delay);
-  };
-
-  // startup delay: sedikit jitter supaya tidak bareng dengan device lain
-  timer = setTimeout(tick, withJitter(200));
-}
+  function startPolling(){
+    stopPolling();
+    const tick = async () => {
+      await fetchToken();
+      const delay = withJitter(currentBaseInterval() * (elStatus.classList.contains('err') ? 2 : 1));
+      timer = setTimeout(tick, delay);
+    };
+    timer = setTimeout(tick, 200);
+  }
 
   function stopPolling(){ if (timer) { clearTimeout(timer); timer = null; } }
 
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) { stopPolling(); }
+    if (document.hidden) stopPolling();
     else { startPolling(); fetchToken(); }
   });
 
