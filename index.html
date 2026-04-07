@@ -3,82 +3,218 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login QR Absen — OTP System</title>
+  <title>SAPA QR — Login Area</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family:'Segoe UI',sans-serif; background:#111; color:#fff; text-align:center; margin:0; }
-    header { background:#b40000; padding:20px; }
-    header img { width:220px; }
-    header h1 { margin:10px 0 0; font-size:1.5em; }
-    header h2 { margin:5px 0 0; font-size:1.2em; }
-    .container { padding:40px 20px; }
+    :root {
+      --bg-main: #0b0d12;
+      --bg-card: #16181f;
+      --border-color: #262933;
+      --brand-red: #d11111;
+      --brand-dark: #990505;
+      --text-main: #f3f4f6;
+      --text-muted: #9ca3af;
+    }
 
-    input[type="password"]{
-      font-size:1.1em; padding:12px; width:100%; max-width:300px; margin:20px auto 10px;
-      border:1px solid #2a2a2e; border-radius:8px; text-align:center; background:#101010; color:#fff;
-      display:block;
+    * { box-sizing: border-box; }
+    
+    body { 
+      font-family: 'Inter', sans-serif; 
+      background: var(--bg-main); 
+      color: var(--text-main); 
+      text-align: center; 
+      margin: 0; 
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
-    .btn{
-      font-size:1.05em; background:#b40000; color:#fff; border:none; border-radius:10px; cursor:pointer;
-      padding:14px; transition:background-color .3s ease, transform .15s ease; width:100%; max-width:300px; margin:8px auto 0;
-    }
-    .btn:hover{ background:#ff1c1c; transform:scale(1.03); }
-    .btn:disabled { background: #555; cursor: not-allowed; }
 
-    .area-selection{ display:none; margin-top:24px; }
-    .cluster-badge{ display:inline-block; padding:6px 12px; border:1px solid #ff7a7a; color:#ffd3d3; border-radius:999px; margin-bottom:12px; }
-    .area-title{ font-size:1.1em; margin:6px 0 16px; color:#ccc; }
-    .area-grid{
-      display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:15px; max-width:520px; margin:0 auto;
+    /* HEADER ELEGANT */
+    header { 
+      background: linear-gradient(135deg, var(--brand-dark) 0%, var(--brand-red) 100%);
+      padding: 24px 20px; 
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
     }
-    .area-grid .btn{ max-width:unset; height: 100%; }
-    .btn small { font-size: 10px; opacity: 0.7; display: block; margin-bottom: 2px; }
-    @media (max-width:480px){ .area-grid{ grid-template-columns:1fr; } }
+    header img { width: 180px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
+    header h1 { margin: 12px 0 4px; font-size: 1.4em; font-weight: 700; letter-spacing: 1px; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
+    header h2 { margin: 0; font-size: 0.9em; font-weight: 400; color: rgba(255,255,255,0.85); letter-spacing: 0.5px; }
+
+    /* KOTAK KONTEN TENGAH */
+    .container { 
+      padding: 40px 20px; 
+      flex: 1; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+    }
+
+    /* CARD LOGIN STYLE */
+    #login-form {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 32px 24px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    #login-form p { color: var(--text-muted); font-size: 0.95em; margin-bottom: 20px; }
+
+    input[type="password"] {
+      font-family: 'Inter', sans-serif;
+      font-size: 1.1em; 
+      padding: 14px; 
+      width: 100%; 
+      margin-bottom: 16px;
+      border: 1px solid var(--border-color); 
+      border-radius: 10px; 
+      text-align: center; 
+      background: #0f1115; 
+      color: #fff;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      letter-spacing: 2px;
+    }
+    input[type="password"]:focus {
+      outline: none;
+      border-color: var(--brand-red);
+      box-shadow: 0 0 0 3px rgba(209, 17, 17, 0.2);
+    }
+
+    /* TOMBOL UTAMA */
+    .btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 1em; 
+      font-weight: 600;
+      background: linear-gradient(135deg, var(--brand-red), var(--brand-dark)); 
+      color: #fff; 
+      border: 1px solid rgba(255,255,255,0.1); 
+      border-radius: 10px; 
+      cursor: pointer;
+      padding: 14px; 
+      width: 100%; 
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .btn:hover:not(:disabled) { 
+      transform: translateY(-2px); 
+      box-shadow: 0 6px 16px rgba(209, 17, 17, 0.4); 
+      filter: brightness(1.1);
+    }
+    .btn:disabled { background: #333; color: #777; cursor: not-allowed; border-color: #333; box-shadow: none; transform: none; }
+
+    /* DASHBOARD AREA */
+    .area-selection { display: none; width: 100%; max-width: 600px; animation: fadeIn 0.4s ease forwards; }
+    
+    .cluster-badge { 
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 14px; 
+      background: rgba(209, 17, 17, 0.1);
+      border: 1px solid rgba(209, 17, 17, 0.3); 
+      color: #ff6b6b; 
+      border-radius: 999px; 
+      font-size: 0.85em;
+      font-weight: 600;
+      margin-bottom: 16px; 
+    }
+    .area-title { font-size: 1.05em; font-weight: 500; margin: 0 0 20px; color: var(--text-muted); }
+
+    /* GRID TOMBOL AREA ELEGANT */
+    .area-grid {
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
+      gap: 14px; 
+    }
+    .area-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px 12px;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    .area-btn:hover {
+      background: #1e212b;
+      border-color: #4a4f5c;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    }
+    .area-btn small { 
+      font-size: 0.7em; 
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+    .area-btn span { font-size: 1em; font-weight: 600; }
+
+    /* TOMBOL KELUAR */
+    .btn-logout {
+      background: #1f222b; border: 1px solid var(--border-color); color: var(--text-muted);
+      padding: 10px 24px; border-radius: 8px; font-size: 0.9em; cursor: pointer; transition: 0.2s; margin-top: 32px;
+    }
+    .btn-logout:hover { background: #2a2e39; color: #fff; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
 <body>
 
 <header>
-  <img src="logo.png" alt="Logo Telkom Akses" onerror="this.src='logo_telkom_akses.png'" />
+  <img src="logo.png" alt="Logo Telkom Akses" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/4/4b/Telkom_Akses_Logo.png'" />
   <h1>SAPA - QR</h1>
-  <h2>SISTEM ABSENSI PAKAI QR</h2>
+  <h2>Sistem Absensi Pagi Area</h2>
 </header>
 
 <div class="container">
   <div id="login-form">
-    <p>Masukkan password dari Bot Telegram Korlap:</p>
-    <input type="password" id="pass" placeholder="" />
-    <button onclick="cekPassword()" id="btnLog" class="btn">🔒 Masuk</button>
-    <div id="err" style="display:none; color:#ffc1c1; margin-top:8px;"></div>
+    <p>Masukkan password Korlap untuk mengakses layar QR Code Area:</p>
+    <input type="password" id="pass" placeholder="••••••••" autocomplete="off" />
+    <button onclick="cekPassword()" id="btnLog" class="btn">Masuk Sistem</button>
+    <div id="err" style="display:none; color:#ff6b6b; margin-top:12px; font-size:0.9em;"></div>
   </div>
 
   <div id="area-selection" class="area-selection">
-    <div class="cluster-badge">AKSES DIBERIKAN</div>
-    <p class="area-title">📌 Pilih area untuk menampilkan QR:</p>
+    <div class="cluster-badge">✓ OTENTIKASI BERHASIL</div>
+    <p class="area-title">Pilih layar area yang ingin diaktifkan:</p>
     <div class="area-grid" id="areaGrid"></div>
-    <div style="margin-top:24px;">
-      <button class="btn" onclick="logout()" style="background:#333; font-size: 0.8em; max-width: 150px;">Keluar</button>
-    </div>
+    <button class="btn-logout" onclick="logout()">Keluar dari Sistem</button>
   </div>
 </div>
 
 <script>
-  // 1. GANTI DENGAN URL WEB APP GAS ANDA
+  // 1. URL API GAS
   const API_URL = "https://script.google.com/macros/s/AKfycbzH7Mzki5gHcjasHIAHluJ-YbM6SdbOgI76Q-3kM2qPeZcDAVyDYB2N4uH3Uds3VJ83/exec";
 
-  // 2. DAFTAR SEMUA AREA (JEMBER & PASURUAN)
+  // 2. DAFTAR SEMUA AREA
   const ALL_AREAS = [
-    { cluster: "PASURUAN", label:"📍 Probolinggo", href:"pbl.html" },
-    { cluster: "PASURUAN", label:"📍 Probolinggo 2", href:"pbl2.html" },
-    { cluster: "PASURUAN", label:"📍 Kraksaan", href:"krz.html" },
-    { cluster: "PASURUAN", label:"📍 Lumajang", href:"lmj.html" },
-    { cluster: "JEMBER", label:"📍 Jember", href:"jember.html" },
-    { cluster: "JEMBER", label:"📍 Kebonsari", href:"kebonsari.html" },
-    { cluster: "JEMBER", label:"📍 Puger", href:"puger.html" },
-    { cluster: "JEMBER", label:"📍 Situbondo", href:"situbondo.html" },
-    { cluster: "JEMBER", label:"📍 Bondowoso", href:"bondowoso.html" },
-    { cluster: "JEMBER", label:"📍 Banyuwangi", href:"banyuwangi.html" },
-    { cluster: "JEMBER", label:"📍 Genteng", href:"genteng.html" }
+    { cluster: "JEMBER", label:"Probolinggo", href:"pbl.html" },
+    { cluster: "JEMBER", label:"Probolinggo 2", href:"pbl2.html" },
+    { cluster: "JEMBER", label:"Kraksaan", href:"krz.html" },
+    { cluster: "JEMBER", label:"Lumajang", href:"lmj.html" },
+    { cluster: "JEMBER", label:"Jember", href:"jember.html" },
+    { cluster: "JEMBER", label:"Kebonsari", href:"kebonsari.html" },
+    { cluster: "JEMBER", label:"Puger", href:"puger.html" },
+    { cluster: "JEMBER", label:"Situbondo", href:"situbondo.html" },
+    { cluster: "JEMBER", label:"Bondowoso", href:"bondowoso.html" },
+    { cluster: "JEMBER", label:"Banyuwangi", href:"banyuwangi.html" },
+    { cluster: "JEMBER", label:"Genteng", href:"genteng.html" }
   ];
+
+  // Eksekusi klik enter pada input password
+  document.getElementById("pass").addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      cekPassword();
+    }
+  });
 
   async function cekPassword() {
     const pass = document.getElementById("pass").value.trim();
@@ -88,29 +224,27 @@
     if (!pass) return;
 
     btn.disabled = true;
-    btn.innerText = "Memvalidasi...";
+    btn.innerText = "Memvalidasi Sandi...";
     err.style.display = "none";
 
     try {
-      // Tembak ke API Google Apps Script
       const response = await fetch(`${API_URL}?action=login&pass=${encodeURIComponent(pass)}`);
       const result = await response.json();
 
       if (result.status === "success") {
-        // Simpan status login
         sessionStorage.setItem("loginQR", "true");
         showDashboard();
       } else {
-        err.innerText = result.message || "Password salah atau kedaluwarsa.";
+        err.innerText = "⛔ " + (result.message || "Sandi salah atau kedaluwarsa.");
         err.style.display = "block";
         btn.disabled = false;
-        btn.innerText = "🔒 Masuk";
+        btn.innerText = "Masuk Sistem";
       }
     } catch (e) {
-      err.innerText = "Gagal terhubung ke server.";
+      err.innerText = "⚠️ Gagal terhubung ke server Google.";
       err.style.display = "block";
       btn.disabled = false;
-      btn.innerText = "🔒 Masuk";
+      btn.innerText = "Masuk Sistem";
     }
   }
 
@@ -122,8 +256,8 @@
 
     ALL_AREAS.forEach(a => {
       const b = document.createElement('button');
-      b.className = "btn";
-      b.innerHTML = `<small>${a.cluster}</small>${a.label}`;
+      b.className = "area-btn"; // Pakai class baru biar bentuknya card elegan
+      b.innerHTML = `<small>${a.cluster}</small><span>📍 ${a.label}</span>`;
       b.onclick = () => { location.href = a.href; };
       grid.appendChild(b);
     });
