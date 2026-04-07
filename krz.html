@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>QR Absen KRZ — v2.6</title>
+  <title>QR Absen KRAKSAAN — v3.0</title>
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
   <style>
     :root {
@@ -42,22 +42,24 @@
   </style>
 </head>
 <body>
-  <header><h1>📸 QR Absen — Area KRZ</h1></header>
+  <header>
+    <h1>📸 QR Absen — Area KRAKSAAN</h1>
+  </header>
   <main>
     <section class="board">
       <div class="qr-wrap"><canvas id="qr" width="360" height="360" aria-label="Kode QR"></canvas></div>
-      <div class="sub" id="note">Auto-refresh setiap <b><span id="refreshSec">2</span>s</b>.</div>
+      <div class="sub" id="note">Auto-refresh setiap <b><span id="refreshSec">30</span>s</b>.</div>
       <div class="token" id="tokenDisplay">Memuat token…</div>
       <div class="time" id="waktu">—</div>
       <div class="status" id="status">Siap.</div>
       <div class="actions"><a href="index.html">Ganti Area</a></div>
     </section>
-    <footer>SAPA QR v2.6 • 2025</footer>
+    <footer>SAPA QR v3.0 • 2025 (Local Mode)</footer>
   </main>
 
 <script>
-(() => {
-  // === ✅ LOGIN GUARD TERBARU ===
+(async () => {
+  // === ✅ LOGIN GUARD ===
   const isAuthorized = sessionStorage.getItem('loginQR') === 'true';
   if (!isAuthorized) {
     alert("🔒 Akses ditolak. Silakan login dahulu.");
@@ -65,115 +67,81 @@
     return;
   }
 
-  // === KONFIG ===
-  const AREA = "KRZ"; 
-  const GAS_URL = "https://script.google.com/macros/s/AKfycbzH7Mzki5gHcjasHIAHluJ-YbM6SdbOgI76Q-3kM2qPeZcDAVyDYB2N4uH3Uds3VJ83/exec";
+  // ==========================================
+  // ⚙️ KONFIGURASI UTAMA (UBAH SESUAI AREA)
+  // ==========================================
+  const AREA = "KRZ"; // <- GANTI INI UNTUK AREA LAIN
+  const SECRET_KEY = "SAPA_QR_RAHASIA_TA"; // Kunci rahasia (SAMA UNTUK SEMUA AREA & GAS)
+  const REFRESH_SEC = 30; // QR Berubah tiap 30 detik
   const BOT_DEEPLINK_BASE = "https://t.me/absensi_qr_bot?start=";
-  const INTERVAL_MS = 2000;
-  const FETCH_TIMEOUT = 8000;
-  const QR_MAX = 420, QR_MIN = 220;
-
-  const DAY_START = 6;
-  const DAY_END = 22;
-  const INTERVAL_DAY_MS = 2000;
-  const INTERVAL_NIGHT_MS = 8000;
-  const JITTER_MS = 500;
-
-  function isNight() {
-    const h = new Date().getHours();
-    return !(h >= DAY_START && h < DAY_END);
-  }
-  function withJitter(base) {
-    return base + Math.floor(Math.random() * JITTER_MS);
-  }
-  function currentBaseInterval() {
-    return isNight() ? INTERVAL_NIGHT_MS : INTERVAL_DAY_MS;
-  }
+  // ==========================================
 
   const elQR = document.getElementById('qr');
   const elToken = document.getElementById('tokenDisplay');
   const elTime = document.getElementById('waktu');
   const elStatus = document.getElementById('status');
-  const elRefreshSec = document.getElementById('refreshSec');
-  elRefreshSec.textContent = (INTERVAL_MS/1000).toString();
+  document.getElementById('refreshSec').textContent = REFRESH_SEC.toString();
 
+  // Atur ukuran QR
   function computeQRSize(){
     const vw = Math.min(window.innerWidth, 760) - 64;
-    return Math.max(QR_MIN, Math.min(QR_MAX, Math.floor(vw)));
+    return Math.max(220, Math.min(420, Math.floor(vw)));
   }
-  function resizeQR(){
-    const s = computeQRSize();
-    qr.set({ size: s });
-  }
-  const qr = new QRious({ element: elQR, value: 'Memuat…', size: computeQRSize(), level: 'H', background: '#ffffff', foreground: '#000000' });
-  window.addEventListener('resize', resizeQR);
+
+  const qr = new QRious({ element: elQR, size: computeQRSize(), level: 'H', background: '#ffffff', foreground: '#000000' });
+  window.addEventListener('resize', () => { qr.set({ size: computeQRSize() }); });
 
   let lastToken = '';
-  let timer = null;
-  let backoff = 0;
 
-  function setStatus(msg, ok=false, err=false){
-    elStatus.textContent = msg;
-    elStatus.classList.toggle('ok', ok);
-    elStatus.classList.toggle('err', err);
-  }
   function fmtNow(){
     const now = new Date();
     const opts = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     elTime.textContent = now.toLocaleDateString('id-ID', opts) + ' • ' + now.toLocaleTimeString('id-ID');
   }
-  setInterval(fmtNow, 1000); fmtNow();
 
-  async function fetchWithTimeout(url, ms){
-    const ctrl = new AbortController();
-    const id = setTimeout(() => ctrl.abort(), ms);
-    try {
-      return await fetch(url, { cache:'no-store', signal: ctrl.signal });
-    } finally { clearTimeout(id); }
+  // === MESIN PEMBUAT TOKEN (TOTP LOKAL - 0 FETCH) ===
+  async function generateLocalToken() {
+    const epochSeconds = Math.floor(Date.now() / 1000);
+    // Waktu dibagi durasi (30s) agar token tetap sama selama rentang waktu itu
+    const timeSlot = Math.floor(epochSeconds / REFRESH_SEC); 
+    
+    // Gabung waktu dengan Secret Key & Area agar token unik dan anti-tebak
+    const rawData = timeSlot + "_" + SECRET_KEY + "_" + AREA;
+
+    // Proses Kriptografi (SHA-256) bawaan browser
+    const msgBuffer = new TextEncoder().encode(rawData);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    
+    // Ambil 6 karakter unik
+    const token = hashArray.map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 6).toUpperCase();
+    return token;
   }
 
-  async function fetchToken(){
-    const url = `${GAS_URL}?action=getToken&area=${encodeURIComponent(AREA)}&t=${Date.now()}`;
+  // === LOOP UTAMA ===
+  async function tick() {
+    fmtNow();
     try {
-      setStatus('Mengambil token…');
-      const res = await fetchWithTimeout(url, FETCH_TIMEOUT);
-      const data = await res.json();
+      const newToken = await generateLocalToken();
       
-      if (data && data.token) {
-        const tokenNow = String(data.token);
-        elToken.textContent = 'Token: ' + tokenNow;
-        if (tokenNow !== lastToken){
-          lastToken = tokenNow;
-          qr.value = BOT_DEEPLINK_BASE + encodeURIComponent(tokenNow + "_" + AREA);
-        }
-        setStatus('Tersambung', true, false);
-        backoff = 0;
-      } else {
-        throw new Error(data.message || 'Token tidak ditemukan');
+      // Jika token baru berbeda dari yang tampil, update layar
+      if (newToken !== lastToken) {
+        lastToken = newToken;
+        elToken.textContent = 'Token: ' + newToken;
+        qr.value = BOT_DEEPLINK_BASE + encodeURIComponent(newToken + "_" + AREA);
       }
-    } catch (err){
-      setStatus('Gagal: ' + err.message, false, true);
+      
+      elStatus.textContent = '🟢 Aktif - 0 Fetch API';
+      elStatus.className = 'status ok';
+    } catch (e) {
+      elStatus.textContent = 'Error Generate: ' + e.message;
+      elStatus.className = 'status err';
     }
   }
 
-  function startPolling(){
-    stopPolling();
-    const tick = async () => {
-      await fetchToken();
-      const delay = withJitter(currentBaseInterval() * (elStatus.classList.contains('err') ? 2 : 1));
-      timer = setTimeout(tick, delay);
-    };
-    timer = setTimeout(tick, 200);
-  }
-
-  function stopPolling(){ if (timer) { clearTimeout(timer); timer = null; } }
-
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) stopPolling();
-    else { startPolling(); fetchToken(); }
-  });
-
-  startPolling();
+  // Eksekusi fungsi tick tiap 1 detik (hanya cek jam, tidak menyedot kuota)
+  setInterval(tick, 1000);
+  tick(); // Eksekusi pertama saat halaman dimuat
 })();
 </script>
 </body>
